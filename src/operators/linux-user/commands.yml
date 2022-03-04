@@ -1,0 +1,112 @@
+- command: useradd
+  options:
+    password:
+      description: encrypted password of the new account
+      flag: -p
+    create_home:
+      description: create the user's home directory (leave empty)
+      flag: -m
+    homedir:
+      description: base directory for the home directory of the new account
+      flag: -d
+    expire_date:
+      description: expiration date of the new account
+      flag: -e
+    groups:
+      description: list of supplementary groups to be added to the new account
+      flag: -G
+  description: Add a linux user account to the system
+  enabled: true #does nothing for the moment, could be useful for future functionality
+
+- command: usermod
+  options:
+    comment:
+      description: COMMENT new value of the GECOS field
+      flag: -c
+    home:
+      description: HOME_DIR new home directory for the user account
+      flag: -d
+    expiredate:
+      description: EXPIRE_DATE set account expiration date to EXPIRE_DATE
+      flag: -e
+    inactive:
+      description: INACTIVE set password inactive after expiration to INACTIVE
+      flag: -f
+    gid:
+      description: GROUP force use GROUP as new primary group
+      flag: -g
+    groups:
+      description: GROUPS new list of supplementary GROUPS
+      flag: -G
+    append:
+      description: append the user to the supplemental GROUPS mentioned by the -G
+        option without removing the user from other groups
+      flag: -a
+    help:
+      description: display this help message and exit
+      flag: -h
+    login:
+      description: NEW_LOGIN new value of the login name
+      flag: -l
+    lock:
+      description: lock the user account
+      flag: -L
+    movehome:
+      description: move contents of the home directory to the new location (use only
+        with -d)
+      flag: -m
+    password:
+      description: PASSWORD use encrypted password for the new password
+      flag: -p
+    root:
+      description: CHROOT_DIR directory to chroot into
+      flag: -R
+    prefix:
+      description: PREFIX_DIR prefix directory where are located the /etc/* files
+      flag: -P
+    shell:
+      description: SHELL new login shell for the user account
+      flag: -s
+    uid:
+      description: UID new UID for the user account
+      flag: -u
+    unlock:
+      description: unlock the user account
+      flag: -U
+  description: Modify an Linux account into the system
+  enabled: true #does nothing for the moment, could be useful for future functionality
+
+- command: openssl
+  subcommand: passwd
+  options:
+    MD5:
+      description: MD5-based password algorithm
+      flag: -1
+    SHA256: 
+      description: SHA256-based password algorithm
+      flag: -5
+    SHA512: 
+      description: SHA512-based password algorithm
+      flag: -6
+  description: generate encrypted password (linux sys compatible)
+  enabled: true #does nothing for the moment, could be useful for future functionality
+
+- command: passwd
+  options:
+    delete:
+      description: delete the password for the named account
+      flag: -d
+    force_expire:
+      description: force expire the password for the named account
+      flag: -e
+    lock:
+      description: lock the password of the named account
+      flag: -l
+    unlock:
+      description: unlock the password of the named account
+      flag: -u
+    groups:
+      description: list of supplementary groups to be added to the new account
+      flag: -G
+  description: Add a linux user account to the system
+  enabled: true #does nothing for the moment, could be useful for future functionality

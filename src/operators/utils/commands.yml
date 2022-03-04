@@ -1,0 +1,104 @@
+- command: cp
+  options:
+    backup:
+      description: make a backup of each existing destination file
+      flag: -b
+    force: 
+      description: if an existing destination file cannot be opened, 
+      remove it and try again (this option is ignored when the -n option is also used)
+      flag: -f
+    recursive:
+      description: copy directories recursively
+      flag: -r
+  description: Display accounting data
+  enabled: true
+
+- command: mv
+  options:
+    backup:
+      description: make a backup of each existing destination file
+      flag: --backup
+    force:
+      description: do not prompt before overwriting
+      flag: -f
+    striptrailingslashes:
+      description: remove any trailing slashes from each SOURCE argument
+      flag: --strip-trailing-slashes
+    suffix:
+      description: =SUFFIX. override the usual backup suffix
+      flag: -S
+    targetdirectory=DIRECTORY:
+      description: move all SOURCE arguments into DIRECTORY
+      flag: -t
+    notargetdirectory:
+      description: treat DEST as a normal file
+      flag: -T
+    update:
+      description: move only when the SOURCE file is newer than the destination file
+        or when the destination file is missing
+      flag: -u
+    verbose:
+      description: explain what is being done
+      flag: -v
+    version:
+      description: "output version information and exit "
+      flag: --version
+
+- command: rm
+  options:
+    force:
+      description: ignore nonexistent files and arguments, never prompt
+      flag: "-f"
+    onefilesystem:
+      description: when removing a hierarchy recursively, skip any directory that is
+        on a file system different from that of the corresponding command line
+        argument
+      flag: --one-file-system
+    nopreserveroot:
+      description: do not treat '/' specially
+      flag: --no-preserve-root
+    preserveroot:
+      description: do not remove '/' (default); with 'all', reject any command line
+        argument on a separate device from its parent
+      flag: --preserve-root
+   recursive:
+      description: remove directories and their contents recursively
+      flag: -r
+    dir:
+      description: remove empty directories
+      flag: -d
+    verbose:
+      description: explain what is being done
+    version:
+      description: "output version"
+
+- command: hostname
+  options:
+    ip:
+      description: show ip address
+      flag: -I
+
+- command: getent
+  options:
+    disable-idn:
+      description: disable IDN encoding
+      flag: "--no-idn"
+    service:
+      description: =CONFIG Service configuration to be used
+      flag: -s
+    help:
+      description: Give this help list
+      flag: --help
+    usage:
+      description: Give a short usage message
+      flag: --usage
+    version:
+      description: "Print program version "
+      flag: -V
+
+- command: echo
+  description: echo stdin
+  options:
+    no-newline:
+      desctiption: omit the newline on output
+      flag: -n

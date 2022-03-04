@@ -1,0 +1,12 @@
+- command: pdsh
+  options:
+    nodes:
+      description: target node list (separated by a comma or with brackets notation)
+      flag: -w
+    timeout:
+      description:  set connect timeout (default is 10 sec)
+      flag: -t
+    exclude_nodes:
+      description: set node exclusion list (separated by a comma or with brackets notation)
+      flag: -x
+  description: execute commands on a cluster of nodes

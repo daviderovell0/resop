@@ -1,0 +1,22 @@
+- command: test
+  options:
+    option1:
+      flag: -o1
+      description: option 1 description
+    option2:
+      flag: -o2
+      description: option 2 description
+  description: This is a description
+  enabled: true
+
+- command: testwithfile
+  options:
+    option1:
+      flag: -o1
+      description: option 1 description
+    option2:
+      flag: -o2
+      description: option 2 description
+  description: This is a description
+  temp_file: true
+  enabled: true

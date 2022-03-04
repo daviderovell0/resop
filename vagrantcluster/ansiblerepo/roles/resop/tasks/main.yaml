@@ -1,0 +1,34 @@
+- name: Install curl
+  yum:
+    name: curl
+    update_cache: yes
+
+- name: Get Node.js package from  nodesource 
+  shell: "curl -sL {{ nodejs_repo }} | bash -"
+
+- name: Install node
+  yum:
+    name: nodejs
+
+- name: Add MariaDB repository to system
+  get_url: 
+    url:  https://downloads.mariadb.com/MariaDB/mariadb_repo_setup 
+    dest: /tmp/MariaDB_script.sh
+
+- name: execute MariaDB repository script
+  shell: bash /tmp/MariaDB_script.sh
+
+- name: Install MariaDB (MySQL)
+  yum:
+    name: MariaDB-server
+    state: latest
+
+- name: restart MariaDB Service
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: mariadb
+
+- name: Install api dependencies
+  npm:
+    path: "{{ path }}"

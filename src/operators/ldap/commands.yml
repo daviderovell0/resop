@@ -1,0 +1,231 @@
+- command: ldapadd
+  description: add an LDAP entry to the DIT
+  options:
+    continue:
+      description: continuous operation mode (do not stop on errors)
+      flag: -c
+    file:
+      description: "file read operations from file' "
+      flag: -f
+    debug_level:
+      description: level set LDAP debugging level to `level'
+      flag: --d
+    bind_dn:
+      description: binddn bind DN
+      flag: -D
+    host:
+      description: host LDAP server
+      flag: -h
+    uri:
+      description: URI LDAP Uniform Resource Identifier(s)
+      flag: -H
+    dryrun:
+      description: show what would be done but don't actually do it
+      flag: -n
+    no_reverse_dns:
+      description: do not use reverse DNS to canonicalize SASL host name
+      flag: -N
+    options:
+      description: general options
+      flag: -o
+    port:
+      description: port port on LDAP server
+      flag: -p
+    quiet:
+      description: use SASL Quiet mode
+      flag: -Q
+    verbose:
+      description: run in verbose mode (diagnostics to standard output)
+      flag: -v
+    password:
+      description: passwd bind password (for simple authentication)
+      flag: -w
+    password_file:
+      description: point to file in which the LDAP password is containers
+      flag: -y
+
+- command: ldapsearch
+  description: search the LDAP DIT of a give host
+  options:
+    attr_names_only:
+      description: retrieve attribute names only (no values)
+      flag: -A
+    basedn:
+      description: basedn base dn for search
+      flag: -b
+    continue:
+      description: continuous operation mode (do not stop on errors)
+      flag: -c
+    file:
+      description: file read operations from `file'
+      flag: -f
+    file_prefix:
+      description: "prefix URL prefix for files (default: file:///tmp/)"
+      flag: -F
+    time_limit:
+      description: limit time limit (in seconds, or "none" or "max") for search
+      flag: -l
+    format_LDIF:
+      description: print responses in LDIF format without comments and version
+      flag: -L
+    no_comments:
+      description: print responses in LDIF format without comments and version
+      flag: -LLL
+    protocol_version:
+      description: "version protocol version (default: 3)"
+      flag: -P
+    scope:
+      description: scope one of base, one, sub or children (search scope)
+      flag: -s
+    sort:
+      description: attr sort the results by attribute `attr'
+      flag: -S
+    temp_dir:
+      description: write all values to files in temporary directory
+      flag: -t
+    path:
+      description: "path write files to directory specified by path (default: /tmp)"
+      flag: -T
+    user_friendly:
+      description: include User Friendly entry names in the output
+      flag: -u
+    size_limit:
+      description: limit size limit (in entries, or "none" or "max") for search
+      flag: -z
+    debug:
+      description: level set LDAP debugging level to `level'
+      flag: -d
+    binddn:
+      description: bind DN
+      flag: -D
+    host:
+      description: host LDAP server
+      flag: -h
+    host_uri:
+      description: URI LDAP Uniform Resource Identifier(s)
+      flag: -H
+    dryrun:
+      description: show what would be done but don't actually do it
+      flag: -n
+    no_reverse_dns:
+      description: do not use reverse DNS to canonicalize SASL host name
+      flag: -N
+    options:
+      description: general options
+      flag: -o
+    port:
+      description: port port on LDAP server
+      flag: -p
+    quiet:
+      description: use SASL Quiet mode
+      flag: -Q
+    verbose:
+      description: run in verbose mode (diagnostics to standard output)
+      flag: -v
+    password:
+      description: passwd bind password (for simple authentication)
+      flag: -w
+    password_file:
+      description: point to file in which the LDAP password is containers
+      flag: -y
+    simple:
+      description:  Simple authentication
+      flag: -x
+
+- command: ldapdelete
+  description: Delete an entry from the LDAP DIT
+  options:
+    continue:
+      description: continuous operation mode (do not stop on errors)
+      flag: -c
+    debug_level:
+      description: level set LDAP debugging level to `level'
+      flag: --d
+    file:
+      description: file read operations from `file'
+      flag: -f
+    debug:
+      description: level set LDAP debugging level to `level'
+      flag: -d
+    binddn:
+      description: bind DN
+      flag: -D
+    host:
+      description: host LDAP server
+      flag: -h
+    host_uri:
+      description: URI LDAP Uniform Resource Identifier(s)
+      flag: -H
+    dryrun:
+      description: show what would be done but don't actually do it
+      flag: -n
+    no_reverse_dns:
+      description: do not use reverse DNS to canonicalize SASL host name
+      flag: -N
+    options:
+      description: general options
+      flag: -o
+    port:
+      description: port port on LDAP server
+      flag: -p
+    quiet:
+      description: use SASL Quiet mode
+      flag: -Q
+    verbose:
+      description: run in verbose mode (diagnostics to standard output)
+      flag: -v
+    password:
+      description: passwd bind password (for simple authentication)
+      flag: -w
+    password_file:
+      description: point to file in which the LDAP password is containers
+      flag: -y
+
+- command: ldapmodify
+  description: modify LDAP entry attributes - add, delete, replace
+  options:
+    continue:
+      description: continuous operation mode (do not stop on errors)
+      flag: -c
+    debug_level:
+      description: level set LDAP debugging level to `level'
+      flag: --d
+    file:
+      description: file read operations from `file'
+      flag: -f
+    debug:
+      description: level set LDAP debugging level to `level'
+      flag: -d
+    binddn:
+      description: bind DN
+      flag: -D
+    host:
+      description: host LDAP server
+      flag: -h
+    host_uri:
+      description: URI LDAP Uniform Resource Identifier(s)
+      flag: -H
+    dryrun:
+      description: show what would be done but don't actually do it
+      flag: -n
+    no_reverse_dns:
+      description: do not use reverse DNS to canonicalize SASL host name
+      flag: -N
+    options:
+      description: general options
+      flag: -o
+    port:
+      description: port port on LDAP server
+      flag: -p
+    quiet:
+      description: use SASL Quiet mode
+      flag: -Q
+    verbose:
+      description: run in verbose mode (diagnostics to standard output)
+      flag: -v
+    password:
+      description: passwd bind password (for simple authentication)
+      flag: -w
+    password_file:
+      description: point to file in which the LDAP password is containers
+      flag: -y

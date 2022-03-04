@@ -1,0 +1,13 @@
+package-lock.json
+node_modules
+.env
+dist/
+
+# vagrantcluster generated files
+.vagrant
+*_key
+*_key.pub
+*known_hosts
+
+# daviderovell0 custom
+src/operators/liger

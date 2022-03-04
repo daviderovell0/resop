@@ -1,0 +1,8 @@
+---
+- hosts: fe
+  roles:
+    - common
+    - slurm
+    - nfs-server
+    - userenvironment
+    - resop

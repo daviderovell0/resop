@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+  <h2>User registration form</h2>
+
+  <form method="POST">
+    Username:<br>
+    <input type="text" name="username"><br>
+    Mail:<br>
+    <input type="text" name="mail">
+    <br>
+    Password:<br>
+    <input type="password" name="password">
+    <br><br>
+    <input type="submit" value="Submit">
+  </form>
+
+  <p>
+    *username lowercase, longer than 3 caracters, no special caracters apart ".","-" allowed <br>
+    *password longer than 5 characters <br>
+    Click the "Submit" button to register in the system. If you get a successful JSON response
+    {success: true, ...} your data has been processed correctly,
+    otherwise check the error message and go back to this page to try again. <br>
+    If the error persists, contact me (davide.rovelli@ec-nantes.com)
+
+  </p>
+
+</body>
+
+</html>

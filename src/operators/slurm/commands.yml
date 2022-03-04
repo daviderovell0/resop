@@ -1,0 +1,520 @@
+#sacct command
+- command: sacct
+  options:
+    allusers:
+      description: Displays all users' jobs when run by user root
+      flag: --allusers
+    accounts:
+      description: Displays jobs when a comma separated list of accounts are given as the argument
+      flag: --accounts
+    brief:
+      description: Displays a brief listing consisting of JobID, State, and ExitCode
+      flag: --brief
+    completion:
+      description: Use job completion data instead of job accounting
+      flag: --completion
+    constraints:
+      description: Comma separated list to filter jobs based on what constraints/features the job requested
+      flag: --constraints
+    delimiter:
+      description: ASCII characters used to separate the fields when specifying the -p or -P option
+      flag: --delimiter
+    duplicates:
+      description:
+      flag: --duplicates
+  description: Display accounting data
+  enabled: true
+
+#srun command
+- command: srun
+  options:
+    nodes:
+      description: Request that a minimum of minnodes nodes be allocated to this job
+      flag: -N
+    ntasks:
+      description: Specify the number of tasks to run
+      flag: -n
+    ntasks_per_node:
+      description: Request that ntasks be invoked on each node
+      flag: --ntasks-per-node
+    nodelist:
+      description: Request a specific list of hosts
+      flag: -w
+    output_file:
+      description:
+      flag:  -o
+  form: static/slurm_run_form.html
+  description: This is a description
+  enabled: true
+
+#sbatch command
+- command: sbatch
+  options:
+  form: static/slurm_submitremote_form.html
+  description: sbatch script.sh
+  enabled: true
+
+#sbcast command
+- command: sbcast
+  options:
+    compress:
+      description: Compress the file being transmitted
+      flag: --compress
+    force:
+      description: If the destination file already exists, replace it
+      flag: --force
+    fanout:
+      description: Specify the fanout of messages used for file transfer
+      flag: --fanout
+    jobid:
+      description: Specify the job ID to use with optional step ID
+      flag: --jobid
+    preserve:
+      description: Preserves modification times, access times, and modes from the original file
+      flag: --preserve
+    size:
+      description: Specify the block size used for file broadcast
+      flag: --size
+    timeout:
+      description: Specify the message timeout in seconds
+      flag: --timeout
+    verbose:
+      description: Provide detailed event logging through program execution
+      flag: --verbose
+    version:
+      description: Print version information and exit.
+      flag: --version
+  description: Transfer file to a job's compute nodes
+  enabled: true
+
+#scancel command
+- command: scancel
+  options:
+    account:
+      description: Restrict the scancel operation to jobs under this charge account
+      flag: --account
+    batch:
+      description: With this option scancel signals only the batch step, but not any other steps
+      flag: --batch
+    ctld:
+      description: Send the job signal request to the slurmctld daemon rather than directly to the slurmd daemons
+      flag: --ctld
+    full:
+      description: With this option scancel signals also the batch script and its children processes
+      flag: --full
+    help:
+      description: Print a help message describing all scancel options
+      flag: --help
+    hurry:
+      description: Do not stage out any burst buffer data
+      flag: --hurry
+    interactive:
+      description: Interactive mode
+      flag: --interactive
+    clusters:
+      description: Cluster to issue commands to
+      flag: --clusters
+    jobname:
+      description: Restrict the scancel operation to jobs with this job name
+      flag: --jobname
+    partition:
+      description: Restrict the scancel operation to jobs in this partition
+      flag: --partition
+    qos:
+      description: Restrict the scancel operation to jobs with this quality of service
+      flag: --qos
+    quiet:
+      description: Do not report an error if the specified job is already completed
+      flag: --quiet
+    reservation:
+      description: Restrict the scancel operation to jobs with this reservation name
+      flag: --reservation
+    sibling:
+      description: Remove an active sibling job from a federated job
+      flag: --sibling
+    signal:
+      description: The name or number of the signal to send
+      flag: --signal
+    state:
+      description: Restrict the scancel operation to jobs in this state
+      flag: --state
+    user:
+      description: Restrict the scancel operation to jobs owned by this user
+      flag: --user
+    usage:
+      description: Print a brief help message listing the scancel options
+      flag: --usage
+    verbose:
+      description: Print additional logging. Multiple v's increase logging detail
+      flag: --verbose
+    version:
+      description: Print the version number of the scancel command
+      flag: --version
+    nodelist:
+      description: Cancel any jobs using any of the given hosts
+      flag: --nodelist
+    wckey:
+      description: Restrict the scancel operation to jobs using this workload characterization key
+      flag: --wckey
+  form:
+  description: scancel is used to signal or cancel jobs, job arrays or job steps
+  enabled: true
+
+#salloc command
+- command: salloc
+  options:
+    account:
+      description: Charge resources used by  this  job  to  specified  account
+      flag: --account
+    acctgfreq:
+      description: Define the job accounting and profiling sampling intervals
+      flag: --acctg-freq
+    extranodeinfo:
+      description: Restrict  node  selection  to  nodes with at least the specified number of sockets, cores per socket and/or threads per core
+      flag: --extra-node-info
+    bb:
+      description: Burst buffer specification
+      flag: --bb
+    bbf:
+      description: Path of file containing burst buffer specification
+      flag: --bbf
+    begin:
+      description: Submit the batch script to the Slurm controller immediately
+      flag: --begin
+    bell:
+      description: Force salloc to ring the terminal bell when the job allocation is granted
+      flag: --bell
+    cluster-constraint:
+      description: Specifies features that a federated  cluster  must  have  to  have  a  sibling  job submitted  to it
+      flag: --cluster-constraint
+    account:
+      description: Charge resources used by  this  job  to  specified  account
+      flag: --account
+    comment:
+      description: An arbitrary comment
+      flag: --comment
+    constraint:
+      description: Users  can specify  which  of  these  features  are required by their job using the constraint option
+      flag: --constraint
+    contiguous:
+      description: If set, then the allocated nodes must form a contiguous set
+      flag: --contiguous
+    cores-per-socket:
+      description: Restrict node selection to nodes with at least the specified number of cores per socket
+      flag: --cores-per-socket
+    cpu-freq:
+      description: Request that job steps initiated by srun commands inside this allocation be run at some requested frequency
+      flag: --cpu-freq
+    cpus-per-gpu:
+      description: Advise Slurm that ensuing job steps will require ncpus processors per allocated GPU
+      flag: --cpus-per-gpu
+    cpus-per-task:
+      description: Advise Slurm that ensuing job steps will require ncpus processors per task
+      flag: --cpus-per-task
+    deadline:
+      description: remove the job if no ending is possible before this deadline
+      flag: --deadline
+    delay-boot:
+      description: Do not reboot nodes in order to satisfied this job's feature specification if the job has been eligible to run for less than this time period
+      flag: --delay-boot
+    dependency:
+      description: Defer the start of this job until the specified dependencies have been satisfied completed
+      flag: --dependency
+    chdir:
+      description: Change directory to path before beginning execution
+      flag: --chdir
+    exclusive:
+      description: The job allocation can not share nodes with other running jobs
+      flag: --exclusive
+    nodefile:
+      description:
+      flag: --nodefile
+    get-user-env:
+      description: This option will load login environment variables for the user specified in the --uid option
+      flag: --get-user-env
+    gid:
+      description: Submit the job with the specified group's group access permissions
+      flag: --gid
+    gpus:
+      description: Specify the total number of GPUs required for the job
+      flag: --gpus
+    gpu-bind:
+      description: Bind tasks to specific GPUs
+      flag: --gpu-bind
+    hold:
+      description: Specify the job is to be submitted in a held state
+      flag: --hold
+    help:
+      description: Display help information and exit
+      flag: --help
+    hint:
+      description: Bind tasks according to application hints
+      flag: --hint
+    immediate:
+      description: exit if resources are not available within the time period specified
+      flag: --immediate
+    job-name:
+      description: Specify a name for the job allocation
+      flag: --job-name
+    kill-command:
+      description: If you specify the --kill-command option salloc will send a signal to your command any time that the Slurm controller tells salloc that its job allocation has been revoked
+      flag: --kill-command
+    no-kill:
+      description: Do not automatically terminate a job if one of the nodes it has been allocated fails
+      flag: --no-kill
+    licenses:
+      description: Specification of licenses (or other resources available on all nodes of the cluster) which must be allocated to this job
+      flag: --licenses
+    clusters:
+      description: Clusters to issue commands to
+      flag: --clusters
+    distribution:
+      description:
+      flag: --distribution
+  form:
+  description: salloc  is  used  to allocate a Slurm job allocation
+  enabled: true
+#Salloc command's options are too many, we've just implemented the half
+
+#squeue command
+- command: squeue
+  options:
+    accounts:
+      flag: --accounts
+      description: Specify the accounts of the jobs to view. Accepts a comma separated list of account names. This has no effect when listing job steps.
+    all:
+      flag: --all
+      description: Display information about jobs and job steps in all partitions.
+    array:
+      flag: --array
+      description: Display one job array element per line.
+    array-unique:
+      flag: --array-unique
+      description: Display one unique pending job array element per line.
+    federation:
+      flag: --federation
+      description: Show jobs from the federation if a member of one.
+    noheader:
+      flag: --noheader
+      description: Do not print a header on the output.
+    help:
+      flag: --help
+      description: Print a help message describing all options squeue.
+    hide:
+      flag: --hide
+      description: Do not display information about jobs and job steps in all partitions.
+    iterate:
+      flag: --iterate
+      description: Repeatedly gather and report the requested information at the interval specified (in seconds).
+    jobs:
+      flag: --jobs
+      description: Requests a comma separated list of job IDs to display. Defaults to all jobs. The --jobs=<job_id_list> option may be used in conjunction with the --steps option to print step information about specific jobs.
+    local:
+      flag: --local
+      description: Show only jobs local to this cluster. Ignore other clusters in this federation (if any).
+    long:
+      flag: --long
+      description: Report more of the available information for the selected jobs or job steps, subject to any constraints specified.
+    licenses:
+      flag: --licenses
+      description: Request jobs requesting or using one or more of the named licenses. The license list consists of a comma separated list of license names.
+    me:
+      flag: --me
+      description: Equivalent to --user=<my username>.
+    clusters:
+      flag: --clusters
+      description: Clusters to issue commands to. Multiple cluster names may be comma separated.
+    name:
+      flag: --name
+      description: Request jobs or job steps having one of the specified names. The list consists of a comma separated list of job names.
+    noconvert:
+      flag: --noconvert
+      description: Don't convert units from their original type (e.g. 2048M won't be converted to 2G).
+    format:
+      flag: --format
+      description: Specify the information to be displayed, its size and position (right or left justified). (see --Format and https://slurm.schedmd.com/squeue.html)
+    Format:
+      flag: --Format
+      description: Specify the information to be displayed. (see --format and https://slurm.schedmd.com/squeue.html)
+    partition:
+      flag: --partition
+      description: Specify the partitions of the jobs or steps to view. Accepts a comma separated list of partition names.
+    priority:
+      flag: --priority
+      description: For pending jobs submitted to multiple partitions, list the job once per partition. In addition, if jobs are sorted by priority, consider both the partition and job priority.
+    qos:
+      flag: --qos
+      description: Specify the qos(s) of the jobs or steps to view. Accepts a comma separated list of qos's.
+    reservation:
+      flag: --reservation
+      description: Specify the reservation of the jobs to view.
+    steps:
+      flag: --steps
+      description: Specify the job steps to view. This flag indicates that a comma separated list of job steps to view follows without an equal sign (see examples).
+    sibling:
+      flag: --sibling
+      description: Show all sibling jobs on a federated cluster. Implies --federation.
+    sort:
+      flag: --sort
+      description: Specification of the order in which records should be reported. This uses the same field specification as the <output_format>. (more on https://slurm.schedmd.com/squeue.html)
+    start:
+      flag: --start
+      description: Report the expected start time and resources to be allocated for pending jobs in order of increasing start time.
+    states:
+      flag: --states
+      description: Specify the states of jobs to view. Accepts a comma separated list of state names or "all". If "all" is specified then jobs of all states will be reported.
+    user:
+      flag: --user
+      description: Request jobs or job steps from a comma separated list of users. The list can consist of user names or user id numbers.
+    usage:
+      flag: --usage
+      description: Print a brief help message listing the squeue options.
+    verbose:
+      flag: --verbose
+      description: Report details of squeues actions.
+    version:
+      flag: --version
+      description: Print version information and exit.
+    nodelist:
+      flag: --nodelist
+      description: Report only on jobs allocated to the specified node or list of nodes. This may either be the NodeName or NodeHostname as defined in slurm.conf(5) in the event that they differ.
+
+  description: squeue is used to view job and job step information for jobs managed by Slurm.
+  enabled: true # not currently used, but can be used to disable certain commands temporarily
+
+#scontrol command
+- command: scontrol
+  options:
+    all:
+      flag: --all
+      description: When the show command is used, then display all partitions, their jobs and jobs steps.
+    details:
+      flag: --details
+      description: Causes the show command to provide additional details where available.
+    federation:
+      flag: --federation
+      description: Report jobs from federation if a member of one.
+    future:
+      flag: --future
+      description: Report nodes in FUTURE state.
+    help:
+      flag: --help
+      description: Print a help message describing the usage of scontrol.
+    hide:
+      flag: --hide
+      description: Do not display information about hidden partitions, their jobs and job steps.
+    local:
+      flag: --local
+      description: Show only information local to this cluster. Ignore other clusters in the federated if a member of one. Overrides --federation.
+    clusters:
+      flag: --clusters
+      description: The cluster to issue commands to. Only one cluster name may be specified. Note that the SlurmDBD must be up for this option to work properly.
+    oneliner:
+      flag: --oneliner
+      description: Print information one line per record.
+    quiet:
+      flag: --quiet
+      description: Print no warning or informational messages, only fatal error messages.
+    sibling:
+      flag: --sibling
+      description: Show all sibling jobs on a federated cluster. Implies --federation.
+    uid:
+      flag: --uid
+      description: Attempt to update a job as user <uid> instead of the invoking user id.
+    verbose:
+      flag: --verbose
+      description: Print detailed event logging. Multiple -v's will further increase the verbosity of logging. By default only errors will be displayed.
+    version:
+      flag: --version
+      description: Print version information and exit.
+
+  description: scontrol is used to view or modify Slurm configuration including job, job step, node, partition, reservation, and overall system configuration. Most of the commands can only be executed by user root or an Administrator.
+  enabled: true # not currently used, but can be used to disable certain commands temporarily
+
+#sinfo command
+- command: sinfo
+  options:
+    all:
+      flag: --all
+      description: Display information about all partitions.
+    dead:
+      flag: --dead
+      description: If set, only report state information for non-responding (dead) nodes.
+    exact:
+      flag: --exact
+      description: If set, do not group node information on multiple nodes unless their configurations to be reported are identical.
+    federation:
+      flag: --federation
+      description: Show jobs from the federation if a member of one.
+    noheader:
+      flag: --noheader
+      description: Do not print a header on the output.
+    help:
+      flag: --help
+      description: Print a message describing all sinfo options.
+    hide:
+      flag: --hide
+      description: Do not display information about hidden partitions.
+    iterate:
+      flag: --iterate
+      description: Print the state on a periodic basis. Sleep for the indicated number of seconds between reports.
+    local:
+      flag: --local
+      description: Show only jobs local to this cluster. Ignore other clusters in this federation (if any).
+    long:
+      flag: --long
+      description: Print more detailed information. This is ignored if the --format option is specified..
+    clusters:
+      flag: --clusters
+      description: Clusters to issue commands to. Multiple cluster names may be comma separated.
+    nodes:
+      flag: --nodes
+      description: Print information about the specified node(s). Multiple nodes may be comma separated or expressed using a node range expression.
+    noconvert:
+      flag: --noconvert
+      description: Don't convert units from their original type (e.g. 2048M won't be converted to 2G).
+    Node:
+      flag: --Node
+      description: Print information in a node-oriented format with one line per node and partition. That is, if a node belongs to more than one partition, then one line for each node-partition pair will be shown.
+    format:
+      flag: --format
+      description: Specify the information to be displayed using an sinfo format string. (see also --Format and https://slurm.schedmd.com/squeue.html)
+    Format:
+      flag: --Format
+      description: Specify the information to be displayed. (see also --format and https://slurm.schedmd.com/squeue.html)
+    partition:
+      flag: --partition
+      description: Print information only about the specified partition(s). Multiple partitions are separated by commas.
+    responding:
+      flag: --responding
+      description: If set only report state information for responding nodes.
+    list-reasons:
+      flag: --list-reasons
+      description: List reasons nodes are in the down, drained, fail or failing state. When nodes are in these states Slurm supports the inclusion of a "reason" string by an administrator.
+    summarize:
+      flag: --summarize
+      description: List only a partition state summary with no node state details. This is ignored if the --format option is specified.
+    steps:
+      flag: --steps
+      description: Specify the job steps to view. This flag indicates that a comma separated list of job steps to view follows without an equal sign (see examples).
+    sort:
+      flag: --sort
+      description: Specification of the order in which records should be reported. This uses the same field specification as the <output_format>. (more on https://slurm.schedmd.com/squeue.html)
+    states:
+      flag: --states
+      description: List nodes only having the given state(s). Multiple states may be comma separated and the comparison is case insensitive. If the states are separated by '&', then the nodes must be in all states.
+    reservation:
+      flag: --reservation
+      description: Only display information about Slurm reservations.
+    usage:
+      flag: --usage
+      description: Print a brief message listing the sinfo options.
+    verbose:
+      flag: --verbose
+      description: Provide detailed event logging through program execution.
+    version:
+      flag: --version
+      description: Print version information and exit.
+
+  description: sinfo is used to view partition and node information for a system running Slurm.
+  enabled: true # not currently used, but can be used to disable certain commands temporarily

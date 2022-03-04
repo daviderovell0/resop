@@ -1,0 +1,21 @@
+- command: command_name
+  options:
+    option1:
+      description: option1 specifies this
+      flag: -h
+    option2:
+      description: option 2 does that
+      flag: --option2
+  description: command description
+  enabled: true #does nothing for the moment, could be useful for future functionality
+
+- command: another_command_name
+  options:
+    option1:
+      description: option1 specifies this
+      flag: -h
+    option2:
+      description: option 2 does that
+      flag: --option2
+  description: command description
+  enabled: true #does nothing for the moment, could be useful for future functionality
