@@ -125,7 +125,7 @@ class SSH2Agent {
         });
         // copy the pubkey
         this.conn.exec(
-          `echo "${publicKeyContent}" >> ~/.ssh/authorized_keys & chmod 600 ~/.ssh/authorized_keys`,
+          `echo "${publicKeyContent}" >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys`,
           async (err, stream) => {
             if (err) throw err; // error check for the connection
             stream

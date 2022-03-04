@@ -17,7 +17,7 @@ const errNoDbVars = 'ConfigurationError: ENABLE_DB=true requires ' +
 'DB_NAME,DB_HOST,DB_USER,DB_PORT to be set';
 
 const errClusterSettings = 'ConfigurationError: remote cluster settings' +
-' are missing. Variables CLUSTER_NAME,CLUSTER_ADDRESS,CLUSTER_PORT,' +
+' are missing. Variables CLUSTER_NAME,CLUSTER_ADDRESS,CLUSTER_SSH_PORT,' +
 'CLUSTER_USERS_SSH_KEY_LOCATION are required';
 
 function loadConfiguration() {
@@ -51,14 +51,14 @@ function loadConfiguration() {
   if (
     !e.CLUSTER_NAME ||
     !e.CLUSTER_ADDRESS ||
-    !e.CLUSTER_PORT ||
+    !e.CLUSTER_SSH_PORT ||
     !e.CLUSTER_USERS_SSH_KEY_LOCATION
   ) {
     throw errClusterSettings;
   }
   console.log(`\tCluster ${e.CUSTER_NAME} settings:`);
   console.log(`\t\taddress: ${e.CLUSTER_ADDRESS}:${e.CLUSTER_PORT}`);
-  console.log(`\t\tPrivate keys stored at: ${e.CLUSTER_USERS_SSH_KEY_LOCATION}`);
+  console.log(`\t\tPrivate keys stored at: ${e.CLUSTER_USERS_SSH_KEY_LOCATION}\n`);
 }
 
 export default loadConfiguration;

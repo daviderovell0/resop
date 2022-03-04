@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/', (req, res) => {
   try {
     res.json({
-      message: 'Welcome to resop API. I am ready to use!',
+      message: 'Welcome to resop API. I am ready to work!',
       user: req.user,
     });
   } catch (err) {
