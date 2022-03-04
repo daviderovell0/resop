@@ -1,13 +1,16 @@
-import 'regenerator-runtime/runtime.js';
-import { readFileSync } from 'fs';
-import https from 'https';
-import http from 'http';
-import 'dotenv/config'; // load env variables from configuration file .env
-
 // REQUIRED MODULES:
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import 'regenerator-runtime/runtime.js';
+import { readFileSync } from 'fs';
+import https from 'https';
+import http from 'http';
+
+// configuration before setting the api
+import loadConfiguration from './env';
+
+loadConfiguration();
 
 // Custom middlewares
 import routes from './routes';
@@ -17,9 +20,16 @@ import auth from './auth';
 let credentials = null;
 
 if (process.env.ENABLE_HTTPS === 'true') {
-  const privateKey = readFileSync(process.env.SSL_PRIVATE_KEY, 'utf8');
-  const certificate = readFileSync(process.env.SSL_CERTIFICATE, 'utf8');
-  credentials = { key: privateKey, cert: certificate };
+  try {
+    const privateKey = readFileSync(process.env.SSL_PRIVATE_KEY, 'utf8');
+    const certificate = readFileSync(process.env.SSL_CERTIFICATE, 'utf8');
+    credentials = { key: privateKey, cert: certificate };
+  } catch (e) {
+    const errLoadHTTPS =
+      `HTTPSCertificateError: ${e.message}. Check the ` +
+      ' SSL variables in the configuration file .env';
+    throw errLoadHTTPS;
+  }
 }
 
 // LOAD MIDDLEWARE
