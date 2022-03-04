@@ -29,16 +29,21 @@ This virtual cluster is built around convenience, not security.  It uses Vagrant
 
 +++ Additions +++
 ## resop dev
- There are 2 options: (1) the API can be run on the local machine and access the VM cluster "remotely" or (2) run the API directly from the cluster.
-### 1
-- configure the API .env to connect to the frontend node, using the `vagrant` user that already has sudo rights. `vagrant ssh-config` can generate the configuration to be copied to the local SSH configuration.
-### 2
+Configure the API .env to connect to the frontend node, using the `vagrant` user that already has sudo rights. `vagrant ssh-config` can generate the configuration to be copied to the local SSH configuration.
+```shell
+# example configuration
+CLUSTER_NAME="vagrantcluster"
+CLUSTER_ADDRESS="127.0.0.1"
+CLUSTER_SSH_PORT="2200"
+CLUSTER_USERS_SSH_KEY_LOCATION="/home/daviderovell0/resopkeys"
+```
+<!--### 2
 The API is deployed on the frontend node **fe1** and deployed autmatically with the cluster. Extra steps
 - create the API database (instructions in the API docs-Install) @TODO automatize
 - set the .env file with vagrant as *CLUSTER_USER* (instructions in the API docs-Deploy)
-- access the API at port `3300` from your local machine
-#### useful commands
-- to copy modified files (including ansible playbooks, as they are executed *from within* the cluster) to the cluster without rebooting the VMs -> `vagrant rsync` or `vagrant rsync fe1` for the API only.
+- access the API at port `3300` from your local machine -->
+### useful commands
+- to copy modified files (including ansible playbooks, as they are executed *from within* the cluster) to the cluster without rebooting the VMs -> `vagrant rsync <vm>`
 - to run ansible (only) -> `vagrant provision` or `vagrant provision fe1` for the API only.
 - `vagrant rsync-auto fe1` to keep copying the modified files while developing. Can be used in combination with `nodemon` for instant changes.
 
