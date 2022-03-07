@@ -14,7 +14,7 @@ const errNoHttpsVars = 'ConfigurationError: ENABLE_HTTPS=true requires ' +
 const errNoSecret = 'ConfigurationError: variable JWT_SECRET is required';
 
 const errNoDbVars = 'ConfigurationError: ENABLE_DB=true requires ' +
-'DB_NAME,DB_HOST,DB_USER,DB_PORT to be set';
+'DB,DB_HOST,DB_USER,DB_PORT to be set';
 
 const errClusterSettings = 'ConfigurationError: remote cluster settings' +
 ' are missing. Variables CLUSTER_NAME,CLUSTER_ADDRESS,CLUSTER_SSH_PORT,' +
@@ -41,7 +41,7 @@ function loadConfiguration() {
   // check that is database properly set
   if (e.ENABLE_DB === 'true') {
     console.log('\tDatabase enabled');
-    if (!e.DB_NAME || !e.DB_HOST || !e.DB_PORT || e.DB_USER) {
+    if (!e.DB || !e.DB_HOST || !e.DB_PORT || !e.DB_USER) {
       throw errNoDbVars;
     }
   } else {
@@ -57,7 +57,7 @@ function loadConfiguration() {
     throw errClusterSettings;
   }
   console.log(`\tCluster ${e.CUSTER_NAME} settings:`);
-  console.log(`\t\taddress: ${e.CLUSTER_ADDRESS}:${e.CLUSTER_PORT}`);
+  console.log(`\t\taddress: ${e.CLUSTER_ADDRESS}:${e.CLUSTER_SSH_PORT}`);
   console.log(`\t\tPrivate keys stored at: ${e.CLUSTER_USERS_SSH_KEY_LOCATION}\n`);
 }
 
