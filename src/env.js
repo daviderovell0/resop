@@ -56,7 +56,7 @@ function loadConfiguration() {
   ) {
     throw errClusterSettings;
   }
-  console.log(`\tCluster ${e.CUSTER_NAME} settings:`);
+  console.log(`\tCluster ${e.CLUSTER_NAME} settings:`);
   console.log(`\t\taddress: ${e.CLUSTER_ADDRESS}:${e.CLUSTER_SSH_PORT}`);
   console.log(`\t\tPrivate keys stored at: ${e.CLUSTER_USERS_SSH_KEY_LOCATION}\n`);
 }
