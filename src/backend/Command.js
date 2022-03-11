@@ -150,8 +150,8 @@ export default class Command {
       console.log(error, req.body);
       return res.status(422).json({
         success: false,
-        error,
-        req: req.body,
+        input: req.body.input,
+        output: error,
       });
     }
   }
