@@ -44,13 +44,15 @@ async function exec() {
   let type = 'account';
   let unit = 'hours';
 
+  if (opn.options.type === 'project') type = 'account';
   if (
     opn.options.type === 'user' ||
-    opn.options.type === 'project' ||
     opn.options.type === 'account' ||
     opn.options.type === 'cluster'
   ) {
     type = opn.options.type;
+  } else {
+    opn.addLog('Unspecified/Unrecognised type, defaulting to type=account');
   }
 
   // dates
@@ -70,8 +72,8 @@ async function exec() {
   } else {
     opn.addLog('unit = hours');
   }
-  // cluster report
 
+  // CLUSTER report
   if (opn.options.type === 'cluster') {
     opn.addLog('Generating cluster usage report');
     const out = await opn.runCommand(
@@ -90,57 +92,66 @@ async function exec() {
     };
   }
 
-  // project report
-  if (type === 'account' || type === 'project') {
-    let { names } = opn.options;
-
-    // filter namestartswith
-    if (opn.options.nameStartsWith) {
-      const out = await opn.runCommand(
-        'sacctmgr show acc withass format=account'
-      );
-      const outl = [];
-      out.split('\n').forEach((v) => {
-        v = v.replace(/\s/g, ''); // removing whitespaces
-        if (v.startsWith(opn.options.nameStartsWith)) {
-          outl.push(v);
-        }
-      });
-      names = outl.join(',');
-      console.log(names);
-      opn.addLog(`accounts=${names}`);
-    }
-
-    // filter total
-    if (opn.options.total === 'true') {
-      const out = await opn.runCommand(
-        `sreport -Pn  -t ${unit} cluster userutilizationbyaccount ` +
-          `account=${names} start=${start} end=${end} format=used`
-      );
-      let total = 0;
-      out.split('\n').forEach((v) => {
-        total += Number(v);
-      });
-      return total;
-    }
-
-    // normal execution
-    const out = await opn.runCommand(
-      `sreport -Pn  -t ${unit} cluster userutilizationbyaccount ` +
-        `account=${names} start=${start} end=${end} format=login,used`
-    );
-    const outJSON = {};
-    out.split('\n').forEach((v) => {
-      const user = v.split('|')[0];
-      const usage = Number(v.split('|')[1]);
-      // check if  already a value, if not init to 0
-      if (!outJSON[user]) outJSON[user] = 0;
-      // sum in case user have accounted on multiple projects
-      outJSON[user] += usage;
-    });
-    console.log(outJSON);
-    return outJSON;
+  // PROJECT (SLURM ACCOUNT) and USER report
+  let { names } = opn.options;
+  let utilisationby;
+  let sreportFormat;
+  if (type === 'account') {
+    utilisationby = 'userutilizationbyaccount';
+    sreportFormat = 'login,used';
   }
+  if (type === 'user') {
+    utilisationby = 'accountutilizationbyuser';
+    sreportFormat = 'account,used';
+  }
+  // filter namestartswith
+  if (opn.options.nameStartsWith) {
+    const out = await opn.runCommand(
+      `sacctmgr show ${type} withass format=${type} -P`
+    );
+    names = '';
+    out.split('\n').forEach((v) => {
+      if (v.startsWith(opn.options.nameStartsWith)) {
+        names += `${v},`;
+      }
+    });
+    console.log(names);
+    opn.addLog(`${type}s found=${names}`);
+  }
+
+  // filter total
+  if (opn.options.total === 'true') {
+    const out = await opn.runCommand(
+      `sreport -Pn  -t ${unit} cluster ${utilisationby} ` +
+        `${type}=${names} start=${start} end=${end} format=used`
+    );
+    let total = 0;
+    out.split('\n').forEach((v) => {
+      total += Number(v);
+    });
+    return total;
+  }
+
+  // normal execution
+  const out = await opn.runCommand(
+    `sreport -Pn  -t ${unit} cluster ${utilisationby} ` +
+      `${type}=${names} start=${start} end=${end} format=${sreportFormat}`
+  );
+  const outJSON = {};
+  // when specifing multiple projects or users
+  // we can have 1 entry multiple times
+  // (i.e. when a user has 2+ accounts)
+  // the following the hours for a single "subject" (user or account)
+  out.split('\n').forEach((v) => {
+    const subject = v.split('|')[0];
+    const usage = Number(v.split('|')[1]);
+    // check if  already a value, if not init to 0
+    if (!outJSON[subject]) outJSON[subject] = 0;
+    // sum in case user have accounted on multiple projects
+    outJSON[subject] += usage;
+  });
+  console.log(outJSON);
+  return outJSON;
 }
 
 opn.set(exec);
