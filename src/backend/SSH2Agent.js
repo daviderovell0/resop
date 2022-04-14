@@ -49,7 +49,7 @@ class SSH2Agent {
       return {
         success: true,
         command,
-        output: 0,
+        output: 'dev',
       };
     }
 
