@@ -2,7 +2,9 @@ package-lock.json
 node_modules
 .env
 dist/
-
+#bin files
+*.o
+*.out 
 # vagrantcluster generated files
 .vagrant
 *_key
