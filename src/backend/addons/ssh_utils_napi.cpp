@@ -1,6 +1,6 @@
 #include <napi.h>
 #include <iostream>
-#include "ssh_utils.h"
+#include "ssh_utils_lib.h"
 
 using namespace std;
 
@@ -77,10 +77,16 @@ Napi::Value Exec(const Napi::CallbackInfo& info) {
     // if both defined, password is used as priv_key passphrase
 
     char *output;
-    int ec = exec(&hostname[0], &port[0], &username[0], &priv_key[0], &password[0], &commandline[0], &output);
+    int rc = exec(&hostname[0], 
+                  &port[0], 
+                  &username[0], 
+                  &priv_key[0], 
+                  &password[0], 
+                  &commandline[0], 
+                  &output);
 
-    cout << output << endl;
-    return Napi::Number::New(env, ec);
+    //cout << output << endl;
+    return Napi::Number::New(env, rc);
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {

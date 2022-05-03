@@ -1,16 +1,22 @@
-#include "ssh_utils.h"
+#define _GNU_SOURCE
+#include <stdio.h>
+#include "ssh_utils_lib.h"
 #include <libssh2.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include <stdio.h>
 #include <netdb.h>
 #include <sys/select.h>
 #include <unistd.h>
+#include <time.h>
+#include <stdlib.h>
 
 /**
  * @brief returns the string corresponding to the libssh2 error code
  * error coded taken from libssh2.h
+ * 
+ * @note use libssh2_session_last_error for more explanatory
+ * string
  * @param rc 
  * @return char* 
  */
@@ -112,21 +118,39 @@ static int waitsocket(int socket_fd, LIBSSH2_SESSION *session)
 }
 
 /**
+ * close the socket and terminare libssh2 session
+ */
+static void cleanup(int sock, LIBSSH2_SESSION *session) {
+    close(sock);
+    int rc;
+    while((rc = libssh2_session_disconnect(session, "SSH session disconected")) == LIBSSH2_ERROR_EAGAIN);
+    while((rc = libssh2_session_free(session)) == LIBSSH2_ERROR_EAGAIN);
+    libssh2_exit();
+}
+
+/**
  * @brief Create system sockets, bind to the SSH server, start 
  * libSSH2 session
  * 
  * @param hostname 
  * @param port 
+ * @param username remote host SSH username
+ * @param priv_key local private key associated to the remote cluster.
+ * public key is <priv_key>.pub
+ * @param password remote cluster SSH password
  * @param sock return pointer to the socket descriptor
  * @param session return pointer to libssh2 session 
+ * @param output
  * @return return code 
  */
-static int init_connection(char *hostname, char *port, int *sock, LIBSSH2_SESSION **session, char **output) {
+static int sshconnect(char *hostname, char *port, char *username, 
+char *priv_key, char *password, int *sock, LIBSSH2_SESSION **session, 
+char **output) {
     struct addrinfo *res = NULL;
     // init libSSH2
     int rc = libssh2_init(0);
     if(rc != 0) {
-        *output = get_libssh2_error(rc);
+        libssh2_session_last_error(*session,output, NULL, 0);
         return rc;
     }
     
@@ -140,17 +164,19 @@ static int init_connection(char *hostname, char *port, int *sock, LIBSSH2_SESSIO
     }
     // struct sockaddr_in *p = (struct sockaddr_in *)res->ai_addr;
     // char str[256];
-    //printf("found: %s\n", inet_ntop(AF_INET, &p->sin_addr, str, sizeof(str)));
+    // printf("found: %s\n", inet_ntop(AF_INET, &p->sin_addr, str, sizeof(str)));
+
 
     if(connect(*sock, res->ai_addr, sizeof(struct sockaddr)) != 0) {
-        *output = "SSH_UTILS_ERROR: can't get connect to host";
+        *output = "SSH_UTILS_ERROR: can't connect to host. wrong hostname or port?";
         return -1;
     }
 
     /* Create a session instance */
     *session = libssh2_session_init();
     if(!*session) {
-        *output = "LIBSSH2_ERROR_SESSION_INIT_FAILED";
+        //*output = "LIBSSH2_ERROR_SESSION_INIT_FAILED";
+        libssh2_session_last_error(*session,output, NULL, 0);
         return -1;
     }
 
@@ -163,38 +189,10 @@ static int init_connection(char *hostname, char *port, int *sock, LIBSSH2_SESSIO
     while((rc = libssh2_session_handshake(*session, *sock)) ==
            LIBSSH2_ERROR_EAGAIN);
     if(rc) {
-        *output = get_libssh2_error(rc);
+        libssh2_session_last_error(*session,output, NULL, 0);
         return rc;
     }
 
-    return 0;
-}
-
-/**
- * close the socket and terminare libssh2 session
- */
-static void cleanup(int sock, LIBSSH2_SESSION *session) {
-    close(sock);
-    int rc;
-    while((rc = libssh2_session_disconnect(session, "SSH session disconected")) == LIBSSH2_ERROR_EAGAIN);
-    while((rc = libssh2_session_free(session)) == LIBSSH2_ERROR_EAGAIN);
-    libssh2_exit();
-}
-
-/**
- * exported function. desc in .h
- */
-int exec(char *hostname, char *port, char *username, char *priv_key,
-char *password, char *commandline, char **output) {
-    // variables init
-    int sock;
-    //const char *fingerprint;
-    LIBSSH2_SESSION *session;
-    LIBSSH2_CHANNEL *channel;
-    int rc;
-
-    // establish the SSH2 connection
-    if((rc = init_connection(hostname, port, &sock, &session, output))) return rc;
     // authenticate. priority is given to key. 
     // if keypath is set, argument (password) is used as the key passphrase
     if(strlen(priv_key) != 0) {
@@ -208,32 +206,55 @@ char *password, char *commandline, char **output) {
             return -1;
         }
         //printf("pub: %s, priv: %s\n", pub_key, priv_key);
-        while((rc = libssh2_userauth_publickey_fromfile(session, username,
+        while((rc = libssh2_userauth_publickey_fromfile(*session, username,
                                                          pub_key,
                                                          priv_key,
                                                          password)) ==
                LIBSSH2_ERROR_EAGAIN);
         if(rc) {
-            *output = get_libssh2_error(rc);
-            cleanup(sock, session);
+            libssh2_session_last_error(*session,output, NULL, 0);
+            cleanup(*sock, *session);
             return rc;
         }
     } 
     else if(strlen(password) != 0) {
         /* Authenticate via password */
-        while((rc = libssh2_userauth_password(session, username, password)) ==
+        while((rc = libssh2_userauth_password(*session, username, password)) ==
                 LIBSSH2_ERROR_EAGAIN);
         if(rc) {
-            *output = get_libssh2_error(rc);
-            cleanup(sock, session);
+            libssh2_session_last_error(*session,output, NULL, 0);
+            cleanup(*sock, *session);
             return rc;
             }
     }
     else {
         *output = "SSH_UTILS_ERROR: key or password must be speficied";
-        cleanup(sock, session);
+        cleanup(*sock, *session);
         return -1;
     }
+
+    return 0;
+}
+
+
+/**
+ * exported functions. desc in .h
+ */
+
+
+int exec(char *hostname, char *port, char *username, char *priv_key,
+char *password, char *commandline, char **output) {
+    // variables init
+    int sock;
+    //const char *fingerprint;
+    LIBSSH2_SESSION *session;
+    LIBSSH2_CHANNEL *channel;
+    int rc;
+
+    // establish the SSH2 connection
+    if((rc = sshconnect(hostname, port, username, priv_key, password,
+     &sock, &session, output))) 
+        return rc;
 
     // now exec command on host - use waitsocket when receiving LIBSSH2_ERROR_EAGAIN
     // since we are non-blocking
@@ -243,7 +264,7 @@ char *password, char *commandline, char **output) {
         waitsocket(sock, session);
     }
     if(channel == NULL) {
-        *output = "LIBSSH2_ERROR_CHANNEL_INIT_FAILED";
+        libssh2_session_last_error(session,output, NULL, 0);
         cleanup(sock, session);
         return -1;
     }
@@ -252,13 +273,13 @@ char *password, char *commandline, char **output) {
         waitsocket(sock, session);
     }
     if(rc != 0) {
-        *output = get_libssh2_error(rc);
+        libssh2_session_last_error(session,output, NULL, 0);
         cleanup(sock, session);
         return rc;
     }
 
     // read command output
-    char out[1]; // collect both stdout and stderr here
+    char out[5]; // collect both stdout and stderr here
     char buffer[0x4000];
     char buffer_stderr[0x4000];
     int nbytes = libssh2_channel_read(channel, buffer, sizeof(buffer));
@@ -291,17 +312,17 @@ char *password, char *commandline, char **output) {
             //printf("nbytes: %d , nbyteserr %d\n", nbytes, nbytes_stderr);
         }
         else if (nbytes < 0) { // error in the channel_read method
-            *output = get_libssh2_error(nbytes);
+            libssh2_session_last_error(session, output, NULL, 0);
             cleanup(sock, session);
             return nbytes;
         }
         else if (nbytes_stderr < 0) {
-            *output = get_libssh2_error(nbytes_stderr);
+            libssh2_session_last_error(session, output, NULL, 0);
             cleanup(sock, session);
             return nbytes_stderr;
         }
     }
-
+    printf("output: %s\n",out);
     // assign pointer to output return argument
     *output = out;
 
@@ -330,4 +351,204 @@ char *password, char *commandline, char **output) {
 
     return 0;
 
+}
+
+
+int scp_recv(char *hostname, char *port, char *username, char *priv_key,
+char *password, char *src, char *dst, char **output) {
+    // variables init
+    int sock;
+    //const char *fingerprint;
+    LIBSSH2_SESSION *session;
+    LIBSSH2_CHANNEL *channel;
+    libssh2_struct_stat fileinfo;
+    char *dst_formatted = dst;
+    int dst_owner = 0;
+    int rc;
+    
+    // if it's a dir we will keep the name of the source file
+    if(!stat(dst, &fileinfo)  && S_ISDIR(fileinfo.st_mode)) {
+        char *remote_filename;
+        int index_of_last_slash = 0;
+        // find last "/" in the source remote path
+        // if not present take it all
+        for (int i = strlen(src)-1; i >= 0; i--) {
+            if (src[i] == '/') {
+                index_of_last_slash = i;
+            }
+        }
+              
+        remote_filename = src + index_of_last_slash;
+        printf("extracted filename: %s\n", remote_filename);
+        dst_owner = 1;
+        dst_formatted = (char *)malloc((strlen(dst) + strlen(remote_filename))*sizeof(char)+1);
+        dst_formatted[0] = '\0'; // make sure pointer is null
+
+        strncat(dst_formatted, dst, strlen(dst));
+        strncat(dst_formatted, remote_filename, strlen(remote_filename));
+        dst_formatted[strlen(dst) + strlen(remote_filename)] = '\0';
+        printf("new dest: %s\n", dst_formatted);
+    }
+
+    // establish the SSH2 connection
+    if((rc = sshconnect(hostname, port, username, priv_key, password, 
+    &sock, &session, output))) return rc;
+
+    while((channel = libssh2_scp_recv2(session, src, &fileinfo)) == NULL &&
+          libssh2_session_last_error(session, NULL, NULL, 0) ==
+          LIBSSH2_ERROR_EAGAIN) {
+        waitsocket(sock, session);
+    }
+    if(channel == NULL) {
+        int errcode = libssh2_session_last_error(session, output, NULL, 0);
+        cleanup(sock, session);
+        return errcode;
+    }
+
+    // open file AFTER making sure there's no errors in the 
+    // connection and channel process - i.e. if bad remote
+    // path is given. otherwise content erased for nothing
+    FILE *localfile = fopen(dst_formatted, "wb");
+    if(!localfile) {
+        fprintf(stderr, "Can't open %s - wrong path?\n", dst_formatted);
+        asprintf(output, "Can't open %s - wrong path?\n", dst_formatted);
+        return -1;
+    }
+
+    libssh2_struct_stat_size bytes_read = 0;
+    libssh2_struct_stat_size total = 0;
+    while(bytes_read < fileinfo.st_size) {
+        char buf[1024]; // read 1k at a time
+        int rc;
+        int amount = sizeof(buf);
+        // channel_read reads an extra byte at the end of the file
+        // this prevents it...
+        if((fileinfo.st_size -bytes_read) < amount) {
+            amount = (int)(fileinfo.st_size - bytes_read);
+        }
+
+        while((rc = libssh2_channel_read(channel, buf, amount)) > 0) {
+            //printf("bytes read: %d\n", rc);
+            //write(1, buf, rc);    
+            fwrite(buf, sizeof(char), rc, localfile);
+            bytes_read += rc;
+            total += rc;
+            
+            if((fileinfo.st_size -bytes_read) < amount) {
+                amount = (int)(fileinfo.st_size - bytes_read);
+            }
+        }
+
+        // socket busy, retry
+        // only if we are not finished yet, otherwise we wait for nothing
+        if((rc == LIBSSH2_ERROR_EAGAIN) && bytes_read < fileinfo.st_size) { 
+            waitsocket(sock, session); 
+            continue;
+        }
+        if (rc < 0 && rc != LIBSSH2_ERROR_EAGAIN) { // error in the channel_read method
+            libssh2_session_last_error(session,output, NULL, 0);
+            fclose(localfile);
+            remove(dst_formatted); // delete, file is corrupted as we didn't finish reading
+            cleanup(sock, session);
+            return rc;
+        }
+    }
+    // successfully run scp, cleanup & return
+    fclose(localfile);
+    if(dst_owner) free(dst_formatted);
+    
+    // close channel
+    while((rc = libssh2_channel_close(channel)) == LIBSSH2_ERROR_EAGAIN)
+        waitsocket(sock, session);
+
+    libssh2_channel_free(channel);
+    channel = NULL;
+    cleanup(sock, session);
+
+    // format string and assign to output
+    asprintf(output, "Received %ld bytes", (long)total);
+    return 0;
+}
+
+
+int scp_send(char *hostname, char *port, char *username, char *priv_key,
+char *password, char *src, char *dst, char **output) {
+    // variables init
+    int sock;
+    //const char *fingerprint;
+    LIBSSH2_SESSION *session;
+    LIBSSH2_CHANNEL *channel;
+    struct stat fileinfo;
+    int rc;
+    
+    // establish the SSH2 connection
+    if((rc = sshconnect(hostname, port, username, priv_key, password, 
+    &sock, &session, output))) return rc;
+
+    while((channel = libssh2_scp_send64(session, dst, 0660, 
+    (unsigned long)fileinfo.st_size, 0, 0)) == NULL &&
+          libssh2_session_last_error(session, NULL, NULL, 0) ==
+          LIBSSH2_ERROR_EAGAIN) {
+        waitsocket(sock, session);
+    }
+    if(channel == NULL) {
+        int errcode = libssh2_session_last_error(session, output, NULL, 0);
+        cleanup(sock, session);
+        return errcode;
+    }
+
+    FILE *localfile = fopen(src, "rb");
+    if(!localfile) {
+        fprintf(stderr, "File %s not found\n", src);
+        asprintf( output, "File %s not found\n", src);
+        return -1;
+    }
+
+    // get file attributes
+    stat(src, &fileinfo);
+
+    long total = 0;
+    size_t bytes_read = 0;
+    char buf[1024*100]; // read 100k at a time
+    // read until no more bytes = EOF
+    time_t start = time(NULL);
+    while((bytes_read = fread(buf, 1, sizeof(buf), localfile)) > 0) {
+        char *pointer = buf; 
+        int bytes_towrite = bytes_read;
+        total += bytes_read;
+        // have to loop because channel_write might not
+        // write all at once. loop until written bytes = bytes previously read
+        while(bytes_towrite > 0) {
+            while((rc = libssh2_channel_write(channel, pointer, bytes_towrite)) == 
+                LIBSSH2_ERROR_EAGAIN ) {
+                    waitsocket(sock, session);
+            }
+            if(rc < 0) {
+                libssh2_session_last_error(session,output, NULL, 0);
+                cleanup(sock, session);
+                return rc;
+            }
+            
+            bytes_towrite -= rc;
+            pointer += rc;
+        }
+    }
+    int duration = (int)(time(NULL)-start);
+
+    //fprintf(stderr, "Sending EOF\n");
+    while(libssh2_channel_send_eof(channel) == LIBSSH2_ERROR_EAGAIN);
+    //fprintf(stderr, "Waiting for EOF\n");
+    while(libssh2_channel_wait_eof(channel) == LIBSSH2_ERROR_EAGAIN);
+    //fprintf(stderr, "Waiting for channel to close\n");
+    while((rc = libssh2_channel_close(channel)) == LIBSSH2_ERROR_EAGAIN)
+        waitsocket(sock, session);
+
+
+    // successfully run scp, cleanup & return
+    libssh2_channel_free(channel);
+    channel = NULL;
+    cleanup(sock, session);
+    // format string and assign to output
+    asprintf(output, "Sent %ld bytes in %ds", (long)total, duration);
+    return 0;
 }

@@ -33,6 +33,12 @@ extern "C" {
 int exec(char *hostname, char *port, char *username, char *priv_key,
 char *password, char *commandline, char **output);
 
+int scp_recv(char *hostname, char *port, char *username, char *priv_key,
+char *password, char *src, char *dst, char **output);
+
+int scp_send(char *hostname, char *port, char *username, char *priv_key,
+char *password, char *src, char *dst, char **output);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif
