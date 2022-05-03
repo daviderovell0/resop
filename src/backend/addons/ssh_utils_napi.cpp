@@ -1,4 +1,5 @@
 #include <napi.h>
+#include <stdlib.h> 
 #include <iostream>
 #include "ssh_utils_lib.h"
 
@@ -84,8 +85,12 @@ Napi::Value Exec(const Napi::CallbackInfo& info) {
                   &password[0], 
                   &commandline[0], 
                   &output);
+    // since exec allocates output dyncamically, need to free it
+    // first create a new C++ string with it
+    string output_val = output;
+    free(output);
 
-    //cout << output << endl;
+    cout << output_val << endl;
     return Napi::Number::New(env, rc);
 }
 
