@@ -237,9 +237,8 @@ char **output) {
 }
 
 
-/**
- * exported functions. desc in .h
- */
+//// exported functions. desc in .h /////
+
 
 
 int exec(char *hostname, char *port, char *username, char *priv_key,
@@ -279,26 +278,32 @@ char *password, char *commandline, char **output) {
     }
 
     // read command output
-    char out[5]; // collect both stdout and stderr here
+    int output_size = 1024*1024*2; //start with 2MB
+    *output = (char *)malloc(output_size * sizeof(char)); // collect both stdout and stderr here
+    *output[0] = '\0';
     char buffer[0x4000];
     char buffer_stderr[0x4000];
     int nbytes = libssh2_channel_read(channel, buffer, sizeof(buffer));
     int nbytes_stderr = libssh2_channel_read_stderr(channel, buffer_stderr, sizeof(buffer_stderr));
-    //printf("nbytes: %d , nbyteserr %d\n", nbytes, nbytes_stderr);
+
     while(nbytes != 0 || nbytes_stderr != 0) { // exit no more bytes to read in both streams
         /* loop until we block */
         //printf("inloop\n");
-        while(nbytes > 0 || nbytes_stderr > 0) { // receiving!
-            //printf("reading\n");
-            int i;
-            for(i = 0; i < nbytes; ++i) {
-                strncat(out, &buffer[i],1);
-            }
-                
-            for(i = 0; i < nbytes_stderr; ++i) {
-                strncat(out, &buffer_stderr[i],1);
-            }    
+        
+        // check if we overflow init buffer size and reallocate
+        if (strlen(*output) + nbytes > output_size || strlen(*output) + nbytes_stderr > output_size) {
+            //printf("reallocating\n");
+            output_size = output_size*2;
+            char *new_output = (char *)malloc(output_size * sizeof(char));
+            new_output[0] = '\0';
+            strncat(new_output, *output, strlen(*output));
+            free(*output);
+            *output = new_output;
+        }
 
+        while(nbytes > 0 || nbytes_stderr > 0) { // receiving!
+            strncat(*output, buffer, nbytes);
+            strncat(*output, buffer_stderr,nbytes_stderr);
 
             nbytes = libssh2_channel_read(channel, buffer, sizeof(buffer));
             nbytes_stderr = libssh2_channel_read_stderr(channel, buffer_stderr, sizeof(buffer_stderr));
@@ -322,9 +327,6 @@ char *password, char *commandline, char **output) {
             return nbytes_stderr;
         }
     }
-    printf("output: %s\n",out);
-    // assign pointer to output return argument
-    *output = out;
 
     // close channel
     while((rc = libssh2_channel_close(channel)) == LIBSSH2_ERROR_EAGAIN)
@@ -480,12 +482,21 @@ char *password, char *src, char *dst, char **output) {
     LIBSSH2_CHANNEL *channel;
     struct stat fileinfo;
     int rc;
-    
+
+    FILE *localfile = fopen(src, "rb");
+    if(!localfile) {
+        fprintf(stderr, "File %s not found\n", src);
+        asprintf( output, "File %s not found\n", src);
+        return -1;
+    }
+    // get file attributes
+    stat(src, &fileinfo);
+
     // establish the SSH2 connection
     if((rc = sshconnect(hostname, port, username, priv_key, password, 
     &sock, &session, output))) return rc;
 
-    while((channel = libssh2_scp_send64(session, dst, 0660, 
+    while((channel = libssh2_scp_send64(session, dst, fileinfo.st_mode & 0777, 
     (unsigned long)fileinfo.st_size, 0, 0)) == NULL &&
           libssh2_session_last_error(session, NULL, NULL, 0) ==
           LIBSSH2_ERROR_EAGAIN) {
@@ -497,25 +508,16 @@ char *password, char *src, char *dst, char **output) {
         return errcode;
     }
 
-    FILE *localfile = fopen(src, "rb");
-    if(!localfile) {
-        fprintf(stderr, "File %s not found\n", src);
-        asprintf( output, "File %s not found\n", src);
-        return -1;
-    }
-
-    // get file attributes
-    stat(src, &fileinfo);
-
     long total = 0;
     size_t bytes_read = 0;
-    char buf[1024*100]; // read 100k at a time
+    char buf[1024]; // read 100k at a time
     // read until no more bytes = EOF
     time_t start = time(NULL);
     while((bytes_read = fread(buf, 1, sizeof(buf), localfile)) > 0) {
         char *pointer = buf; 
         int bytes_towrite = bytes_read;
         total += bytes_read;
+        //printf("%s\n",buf);
         // have to loop because channel_write might not
         // write all at once. loop until written bytes = bytes previously read
         while(bytes_towrite > 0) {
@@ -528,6 +530,7 @@ char *password, char *src, char *dst, char **output) {
                 cleanup(sock, session);
                 return rc;
             }
+            //printf("%s\n",pointer);
             
             bytes_towrite -= rc;
             pointer += rc;
