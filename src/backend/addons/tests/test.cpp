@@ -71,21 +71,27 @@ int main(int argc, char *argv[]){
           cout << "not yet implemented" << endl;
       }
       else if (strcmp(argv[1], "exec") == 0) {
-          cout << "not yet implemented" << endl;
+          test_exec(&hostname[0], &port[0], &username[0], &private_key[0],
+          &password[0], &commandline[0]);
       }
       else if (strcmp(argv[1], "scp_recv") == 0) {
           test_scp_recv(&hostname[0], &port[0], &username[0], &private_key[0],
           &password[0], &remote_source[0], &local_dest[0] );
       }
       else if (strcmp(argv[1], "scp_send") == 0) {
-          cout << "not yet implemented" << endl;
+         test_scp_send(&hostname[0], &port[0], &username[0], &private_key[0],
+          &password[0], &local_source[0], &remote_dest[0]);
       }
       else {
-          cout << "nothing to do!" << endl;
+          cout << "usage: test.o <test>, where test is one of: connect, exec,"
+          " scp_recv, scp_send" << endl;
       }
 
    }
    else {
        cout << "couldn't open variables.txt" << endl;
+       return -1;
    }
+
+   return 0;
 }
