@@ -118,6 +118,37 @@ static int waitsocket(int socket_fd, LIBSSH2_SESSION *session)
 }
 
 /**
+ * safely copy the error message in output checking whether
+ * it's malloc'd or not. Both cases are possible depending
+ * on the parent function: 
+ * exec->malloc's output,
+ * others->null pointer to be filled with string literal
+ * 
+ * if message is NULL, the function will use the libssh2 
+ * session error
+ */
+static void set_error(char *message, char **output, LIBSSH2_SESSION *session) {
+    char *err;
+
+    if (message == NULL) {
+        libssh2_session_last_error(session, &err, NULL, 0);
+        //printf("%s\n",err);
+    }
+    else err = message;
+
+
+    // if output is a null pointer
+    // it means it's not malloc'd
+    if(*output == NULL) {
+        *output = err;
+    }
+    else {
+        // we assume that output is large enough
+        strncpy(*output,err,strlen(err));
+    }
+}
+
+/**
  * close the socket and terminare libssh2 session
  */
 static void cleanup(int sock, LIBSSH2_SESSION *session) {
@@ -150,7 +181,7 @@ char **output) {
     // init libSSH2
     int rc = libssh2_init(0);
     if(rc != 0) {
-        libssh2_session_last_error(*session,output, NULL, 0);
+        set_error(NULL,  output, *  session);
         return rc;
     }
     
@@ -159,7 +190,10 @@ char **output) {
     *sock = socket(AF_INET, SOCK_STREAM, 0);
     // get the server address 
     if(getaddrinfo(hostname, port, NULL, &res)) {
-        *output = "SSH_UTILS_ERROR: can't get address for given host";
+        // char *err = "SSH_UTILS_ERROR: can't get address for given host";
+        // strncpy(*output,err,strlen(err));
+        set_error("SSH_UTILS_ERROR: can't get address for given host",
+                    output, *session);
         return -1;
     }
     // struct sockaddr_in *p = (struct sockaddr_in *)res->ai_addr;
@@ -168,15 +202,17 @@ char **output) {
 
 
     if(connect(*sock, res->ai_addr, sizeof(struct sockaddr)) != 0) {
-        *output = "SSH_UTILS_ERROR: can't connect to host. wrong hostname or port?";
+        // char *err = "SSH_UTILS_ERROR: can't connect to host. wrong hostname or port?";
+        // strncpy(*output,err,strlen(err));
+        set_error("SSH_UTILS_ERROR: can't connect to host. wrong hostname or port?",
+                    output, *session);
         return -1;
     }
 
     /* Create a session instance */
     *session = libssh2_session_init();
     if(!*session) {
-        //*output = "LIBSSH2_ERROR_SESSION_INIT_FAILED";
-        libssh2_session_last_error(*session,output, NULL, 0);
+        set_error(NULL, output, *session);
         return -1;
     }
 
@@ -189,7 +225,7 @@ char **output) {
     while((rc = libssh2_session_handshake(*session, *sock)) ==
            LIBSSH2_ERROR_EAGAIN);
     if(rc) {
-        libssh2_session_last_error(*session,output, NULL, 0);
+        set_error(NULL, output, *session);
         return rc;
     }
 
@@ -202,7 +238,7 @@ char **output) {
 
         // check if keys exist
         if (access(pub_key, F_OK) != 0 || access(priv_key, F_OK) != 0) {
-            *output = "SSH_UTILS_ERROR: can't find private or public key";
+            set_error("SSH_UTILS_ERROR: can't find private or public key", output, *session);
             return -1;
         }
         //printf("pub: %s, priv: %s\n", pub_key, priv_key);
@@ -212,7 +248,7 @@ char **output) {
                                                          password)) ==
                LIBSSH2_ERROR_EAGAIN);
         if(rc) {
-            libssh2_session_last_error(*session,output, NULL, 0);
+            set_error(NULL, output, *session);
             cleanup(*sock, *session);
             return rc;
         }
@@ -222,13 +258,15 @@ char **output) {
         while((rc = libssh2_userauth_password(*session, username, password)) ==
                 LIBSSH2_ERROR_EAGAIN);
         if(rc) {
-            libssh2_session_last_error(*session,output, NULL, 0);
-            cleanup(*sock, *session);
+            // libssh2_session_last_error(*session,output, NULL, 0);
+            // cleanup(*sock, *session);
+            set_error(NULL,  output, *session);
             return rc;
             }
     }
     else {
-        *output = "SSH_UTILS_ERROR: key or password must be speficied";
+        //char *err = "SSH_UTILS_ERROR: key or password must be speficied";
+        set_error("SSH_UTILS_ERROR: key or password must be speficied", output, *session);
         cleanup(*sock, *session);
         return -1;
     }
@@ -243,6 +281,12 @@ char **output) {
 
 int exec(char *hostname, char *port, char *username, char *priv_key,
 char *password, char *commandline, char **output) {
+    
+    // allocate output to be filled with ${commandline} output or err message
+    int output_size = 1024*1024; //start with 1MB (~27000 lines)
+    int output_size_limit = output_size*32; // put a limit on 32MB to avoid dumping mem
+    *output = (char *)malloc(output_size * sizeof(char)); // collect both stdout and stderr here
+    *output[0] = '\0';
     // variables init
     int sock;
     //const char *fingerprint;
@@ -263,7 +307,7 @@ char *password, char *commandline, char **output) {
         waitsocket(sock, session);
     }
     if(channel == NULL) {
-        libssh2_session_last_error(session,output, NULL, 0);
+        set_error(NULL,  output, session);
         cleanup(sock, session);
         return -1;
     }
@@ -272,15 +316,12 @@ char *password, char *commandline, char **output) {
         waitsocket(sock, session);
     }
     if(rc != 0) {
-        libssh2_session_last_error(session,output, NULL, 0);
+        set_error(NULL,  output, session);
         cleanup(sock, session);
         return rc;
     }
 
     // read command output
-    int output_size = 1024*1024*2; //start with 2MB
-    *output = (char *)malloc(output_size * sizeof(char)); // collect both stdout and stderr here
-    *output[0] = '\0';
     char buffer[0x4000];
     char buffer_stderr[0x4000];
     int nbytes = libssh2_channel_read(channel, buffer, sizeof(buffer));
@@ -289,19 +330,29 @@ char *password, char *commandline, char **output) {
     while(nbytes != 0 || nbytes_stderr != 0) { // exit no more bytes to read in both streams
         /* loop until we block */
         //printf("inloop\n");
-        
-        // check if we overflow init buffer size and reallocate
-        if (strlen(*output) + nbytes > output_size || strlen(*output) + nbytes_stderr > output_size) {
-            //printf("reallocating\n");
-            output_size = output_size*2;
-            char *new_output = (char *)malloc(output_size * sizeof(char));
-            new_output[0] = '\0';
-            strncat(new_output, *output, strlen(*output));
-            free(*output);
-            *output = new_output;
-        }
 
         while(nbytes > 0 || nbytes_stderr > 0) { // receiving!
+            // printf("%d\n", nbytes_stderr);
+            // printf("%p\n", output);
+            // check if we overflow init buffer size and reallocate
+            if ((int)strlen(*output) + nbytes > output_size || (int)strlen(*output) + nbytes_stderr > output_size) {
+                printf("Reallocating output string size\n");
+                output_size = output_size*2;
+                if (output_size >= output_size_limit) {
+                    printf("Reached the output size limit, interrupting read...\n");
+                    nbytes = 0;
+                    nbytes_stderr = 0;
+                    break;
+                }
+
+                char *new_output = (char *)malloc(output_size * sizeof(char));
+                new_output[0] = '\0';
+                strncat(new_output, *output, strlen(*output));
+                free(*output);
+                *output = new_output;
+                continue;
+            }
+
             strncat(*output, buffer, nbytes);
             strncat(*output, buffer_stderr,nbytes_stderr);
 
@@ -317,12 +368,12 @@ char *password, char *commandline, char **output) {
             //printf("nbytes: %d , nbyteserr %d\n", nbytes, nbytes_stderr);
         }
         else if (nbytes < 0) { // error in the channel_read method
-            libssh2_session_last_error(session, output, NULL, 0);
+            set_error(NULL,  output, session);
             cleanup(sock, session);
             return nbytes;
         }
         else if (nbytes_stderr < 0) {
-            libssh2_session_last_error(session, output, NULL, 0);
+            set_error(NULL,  output, session);
             cleanup(sock, session);
             return nbytes_stderr;
         }
@@ -367,7 +418,7 @@ char *password, char *src, char *dst, char **output) {
     char *dst_formatted = dst;
     int dst_owner = 0;
     int rc;
-    
+
     // if it's a dir we will keep the name of the source file
     if(!stat(dst, &fileinfo)  && S_ISDIR(fileinfo.st_mode)) {
         char *remote_filename;
@@ -402,9 +453,9 @@ char *password, char *src, char *dst, char **output) {
         waitsocket(sock, session);
     }
     if(channel == NULL) {
-        int errcode = libssh2_session_last_error(session, output, NULL, 0);
+        set_error(NULL,  output, session);
         cleanup(sock, session);
-        return errcode;
+        return LIBSSH2_ERROR_SCP_PROTOCOL;
     }
 
     // open file AFTER making sure there's no errors in the 
@@ -448,7 +499,7 @@ char *password, char *src, char *dst, char **output) {
             continue;
         }
         if (rc < 0 && rc != LIBSSH2_ERROR_EAGAIN) { // error in the channel_read method
-            libssh2_session_last_error(session,output, NULL, 0);
+            set_error(NULL,  output, session);
             fclose(localfile);
             remove(dst_formatted); // delete, file is corrupted as we didn't finish reading
             cleanup(sock, session);
@@ -503,9 +554,9 @@ char *password, char *src, char *dst, char **output) {
         waitsocket(sock, session);
     }
     if(channel == NULL) {
-        int errcode = libssh2_session_last_error(session, output, NULL, 0);
+        set_error(NULL,  output, session);
         cleanup(sock, session);
-        return errcode;
+        return LIBSSH2_ERROR_SCP_PROTOCOL;
     }
 
     long total = 0;
@@ -526,7 +577,7 @@ char *password, char *src, char *dst, char **output) {
                     waitsocket(sock, session);
             }
             if(rc < 0) {
-                libssh2_session_last_error(session,output, NULL, 0);
+                set_error(NULL,  output, session);
                 cleanup(sock, session);
                 return rc;
             }

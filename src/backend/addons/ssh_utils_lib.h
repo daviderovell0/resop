@@ -24,7 +24,7 @@ extern "C" {
  * @param password remote cluster SSH password
  * @param commandline shell command to submit (depends from the remote shell default)
  * @param output return string - filled with the command output or error. 
- * the srting is dynamcally allocated (malloc) so it must be free'd by the caller after usage! 
+ * the string is dynamcally allocated (malloc)-> must be free'd by the caller after usage 
  * 
  * @return exit code of the remote command
  * < 0: internal error, command not send correctly

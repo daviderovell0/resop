@@ -4,7 +4,6 @@
  * @brief Launcher for tests of ssh_utils_lib
  * 
  * reads variables.txt and launches the chosen test
- * - connect
  * - exec
  * - scp_recv
  * - scp_send
@@ -62,15 +61,15 @@ int main(int argc, char *argv[]){
 
       // launch tests
       if (argc != 2 ) {
-          cout << "usage: test.o <test>, where test is one of: connect, exec,"
+          cout << "usage: test.o <test>, where test is one of: exec,"
           " scp_recv, scp_send" << endl;
           return -1;
       }
 
-      if (strcmp(argv[1], "connect") == 0) {
-          cout << "not yet implemented" << endl;
-      }
-      else if (strcmp(argv[1], "exec") == 0) {
+    //   if (strcmp(argv[1], "connect") == 0) {
+    //       cout << "not yet implemented" << endl;
+    //   }
+     if (strcmp(argv[1], "exec") == 0) {
           test_exec(&hostname[0], &port[0], &username[0], &private_key[0],
           &password[0], &commandline[0]);
       }

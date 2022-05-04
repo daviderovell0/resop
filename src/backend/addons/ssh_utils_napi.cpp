@@ -88,9 +88,9 @@ Napi::Value Exec(const Napi::CallbackInfo& info) {
     // since exec allocates output dyncamically, need to free it
     // first create a new C++ string with it
     string output_val = output;
-    free(output);
+    //free(output);
 
-    cout << output_val << endl;
+    cout << output_val;
     return Napi::Number::New(env, rc);
 }
 
