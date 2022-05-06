@@ -37,7 +37,7 @@ int main(int argc, char *argv[]){
         if(var == "HOSTNAME") hostname = val;
         else if (var == "PORT") port = val;
         else if (var == "USERNAME") username = val;
-        else if (var == "PRIVATE_KEY") private_key = val;
+        else if (var == "PRIV_KEY") private_key = val;
         else if (var == "PASSWORD") password = val;
         else if (var == "COMMANDLINE") commandline = val;
         else if (var == "REMOTE_SOURCE") remote_source = val;

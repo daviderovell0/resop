@@ -1,7 +1,7 @@
 HOSTNAME=remoteserver.com
 PORT=22
 USERNAME=johndoe
-PRIVATE_KEY=/home/johndoe/.ssh/id_rsa
+PRIV_KEY=/home/johndoe/.ssh/id_rsa
 PASSWORD=mypassphrase
 COMMANDLINE=echo hello
 REMOTE_SOURCE=snake.py

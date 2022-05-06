@@ -15,8 +15,7 @@
  * @brief returns the string corresponding to the libssh2 error code
  * error coded taken from libssh2.h
  * 
- * @note use libssh2_session_last_error for more explanatory
- * string
+ * @deprecated - keeping for reference use set_error() instead
  * @param rc 
  * @return char* 
  */
@@ -144,7 +143,7 @@ static void set_error(char *message, char **output, LIBSSH2_SESSION *session) {
     }
     else {
         // we assume that output is large enough
-        strncpy(*output,err,strlen(err));
+        strncpy(*output,err, 1000); // only take 1000 char (assuming error string is small)
     }
 }
 
@@ -347,7 +346,7 @@ char *password, char *commandline, char **output) {
 
                 char *new_output = (char *)malloc(output_size * sizeof(char));
                 new_output[0] = '\0';
-                strncat(new_output, *output, strlen(*output));
+                strncat(new_output, *output, output_size/2);
                 free(*output);
                 *output = new_output;
                 continue;
@@ -434,11 +433,12 @@ char *password, char *src, char *dst, char **output) {
         remote_filename = src + index_of_last_slash;
         printf("extracted filename: %s\n", remote_filename);
         dst_owner = 1;
-        dst_formatted = (char *)malloc((strlen(dst) + strlen(remote_filename))*sizeof(char)+1);
+        int dst_formatted_length = strlen(dst) + strlen(src);
+        dst_formatted = (char *)malloc(dst_formatted_length*sizeof(char)+1);
         dst_formatted[0] = '\0'; // make sure pointer is null
 
-        strncat(dst_formatted, dst, strlen(dst));
-        strncat(dst_formatted, remote_filename, strlen(remote_filename));
+        strncat(dst_formatted, dst, dst_formatted_length);
+        strncat(dst_formatted, remote_filename, dst_formatted_length);
         dst_formatted[strlen(dst) + strlen(remote_filename)] = '\0';
         printf("new dest: %s\n", dst_formatted);
     }
@@ -464,7 +464,11 @@ char *password, char *src, char *dst, char **output) {
     FILE *localfile = fopen(dst_formatted, "wb");
     if(!localfile) {
         fprintf(stderr, "Can't open %s - wrong path?\n", dst_formatted);
-        asprintf(output, "Can't open %s - wrong path?\n", dst_formatted);
+
+        if (asprintf(output, "Can't open %s - wrong path?\n", dst_formatted) == -1) {
+            fprintf(stderr, "Error in asprintf - can't format output variable!"
+                    "\nUnexpected error, report to dev");
+        }
         return -1;
     }
 
@@ -519,7 +523,10 @@ char *password, char *src, char *dst, char **output) {
     cleanup(sock, session);
 
     // format string and assign to output
-    asprintf(output, "Received %ld bytes", (long)total);
+    if (asprintf(output, "Received %ld bytes", (long)total) == -1) {
+        fprintf(stderr, "Error in asprintf - can't format output variable!"
+                    "\nUnexpected error, report to dev");
+    }
     return 0;
 }
 
@@ -537,7 +544,10 @@ char *password, char *src, char *dst, char **output) {
     FILE *localfile = fopen(src, "rb");
     if(!localfile) {
         fprintf(stderr, "File %s not found\n", src);
-        asprintf( output, "File %s not found\n", src);
+        if(asprintf( output, "File %s not found\n", src) == -1) {
+            fprintf(stderr, "Error in asprintf - can't format output variable!"
+                    "\nUnexpected error, report to dev");
+        }
         return -1;
     }
     // get file attributes
@@ -603,6 +613,9 @@ char *password, char *src, char *dst, char **output) {
     channel = NULL;
     cleanup(sock, session);
     // format string and assign to output
-    asprintf(output, "Sent %ld bytes in %ds", (long)total, duration);
+    if(asprintf(output, "Sent %ld bytes in %ds", (long)total, duration) == -1) {
+        fprintf(stderr, "Error in asprintf - can't format output variable!"
+                    "\nUnexpected error, report to dev");
+    }
     return 0;
 }
