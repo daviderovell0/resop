@@ -135,7 +135,6 @@ static void set_error(char *message, char **output, LIBSSH2_SESSION *session) {
     }
     else err = message;
 
-
     // if output is a null pointer
     // it means it's not malloc'd
     if(*output == NULL) {
@@ -277,7 +276,6 @@ char **output) {
 //// exported functions. desc in .h /////
 
 
-
 int exec(char *hostname, char *port, char *username, char *priv_key,
 char *password, char *commandline, char **output) {
     
@@ -407,19 +405,20 @@ char *password, char *commandline, char **output) {
 
 
 int scp_recv(char *hostname, char *port, char *username, char *priv_key,
-char *password, char *src, char *dst, char **output) {
+char *password, char *src, char *dest, char **output) {
+    *output = NULL;
     // variables init
     int sock;
     //const char *fingerprint;
     LIBSSH2_SESSION *session;
     LIBSSH2_CHANNEL *channel;
     libssh2_struct_stat fileinfo;
-    char *dst_formatted = dst;
-    int dst_owner = 0;
+    char *dest_formatted = dest;
+    int dest_owner = 0;
     int rc;
 
     // if it's a dir we will keep the name of the source file
-    if(!stat(dst, &fileinfo)  && S_ISDIR(fileinfo.st_mode)) {
+    if(!stat(dest, &fileinfo)  && S_ISDIR(fileinfo.st_mode)) {
         char *remote_filename;
         int index_of_last_slash = 0;
         // find last "/" in the source remote path
@@ -432,15 +431,15 @@ char *password, char *src, char *dst, char **output) {
               
         remote_filename = src + index_of_last_slash;
         printf("extracted filename: %s\n", remote_filename);
-        dst_owner = 1;
-        int dst_formatted_length = strlen(dst) + strlen(src);
-        dst_formatted = (char *)malloc(dst_formatted_length*sizeof(char)+1);
-        dst_formatted[0] = '\0'; // make sure pointer is null
+        dest_owner = 1;
+        int dest_formatted_length = strlen(dest) + strlen(src);
+        dest_formatted = (char *)malloc(dest_formatted_length*sizeof(char)+1);
+        dest_formatted[0] = '\0'; // make sure pointer is null
 
-        strncat(dst_formatted, dst, dst_formatted_length);
-        strncat(dst_formatted, remote_filename, dst_formatted_length);
-        dst_formatted[strlen(dst) + strlen(remote_filename)] = '\0';
-        printf("new dest: %s\n", dst_formatted);
+        strncat(dest_formatted, dest, dest_formatted_length);
+        strncat(dest_formatted, remote_filename, dest_formatted_length);
+        dest_formatted[strlen(dest) + strlen(remote_filename)] = '\0';
+        printf("new dest: %s\n", dest_formatted);
     }
 
     // establish the SSH2 connection
@@ -461,11 +460,11 @@ char *password, char *src, char *dst, char **output) {
     // open file AFTER making sure there's no errors in the 
     // connection and channel process - i.e. if bad remote
     // path is given. otherwise content erased for nothing
-    FILE *localfile = fopen(dst_formatted, "wb");
+    FILE *localfile = fopen(dest_formatted, "wb");
     if(!localfile) {
-        fprintf(stderr, "Can't open %s - wrong path?\n", dst_formatted);
+        fprintf(stderr, "Can't open %s - wrong path?\n", dest_formatted);
 
-        if (asprintf(output, "Can't open %s - wrong path?\n", dst_formatted) == -1) {
+        if (asprintf(output, "Can't open %s - wrong path?\n", dest_formatted) == -1) {
             fprintf(stderr, "Error in asprintf - can't format output variable!"
                     "\nUnexpected error, report to dev");
         }
@@ -505,14 +504,14 @@ char *password, char *src, char *dst, char **output) {
         if (rc < 0 && rc != LIBSSH2_ERROR_EAGAIN) { // error in the channel_read method
             set_error(NULL,  output, session);
             fclose(localfile);
-            remove(dst_formatted); // delete, file is corrupted as we didn't finish reading
+            remove(dest_formatted); // delete, file is corrupted as we didn't finish reading
             cleanup(sock, session);
             return rc;
         }
     }
     // successfully run scp, cleanup & return
     fclose(localfile);
-    if(dst_owner) free(dst_formatted);
+    if(dest_owner) free(dest_formatted);
     
     // close channel
     while((rc = libssh2_channel_close(channel)) == LIBSSH2_ERROR_EAGAIN)
@@ -532,7 +531,8 @@ char *password, char *src, char *dst, char **output) {
 
 
 int scp_send(char *hostname, char *port, char *username, char *priv_key,
-char *password, char *src, char *dst, char **output) {
+char *password, char *src, char *dest, char **output) {
+    *output = NULL;
     // variables init
     int sock;
     //const char *fingerprint;
@@ -557,7 +557,7 @@ char *password, char *src, char *dst, char **output) {
     if((rc = sshconnect(hostname, port, username, priv_key, password, 
     &sock, &session, output))) return rc;
 
-    while((channel = libssh2_scp_send64(session, dst, fileinfo.st_mode & 0777, 
+    while((channel = libssh2_scp_send64(session, dest, fileinfo.st_mode & 0777, 
     (unsigned long)fileinfo.st_size, 0, 0)) == NULL &&
           libssh2_session_last_error(session, NULL, NULL, 0) ==
           LIBSSH2_ERROR_EAGAIN) {

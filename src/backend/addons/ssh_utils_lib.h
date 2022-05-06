@@ -44,14 +44,14 @@ char *password, char *commandline, char **output);
  * public key is <priv_key>.pub
  * @param password remote cluster SSH password
  * @param src full path (or name in in HOME) of remote file to transfer
- * @param dst full path (or empty if current directory) of the local folder/file 
+ * @param dest full path (or empty if current directory) of the local folder/file 
  * @param output return string - filled with the command output or error
  * @return exit code of the remote command
  * < 0: internal error, error in the scp transfer
  * 0: successful transfer
  */
 int scp_recv(char *hostname, char *port, char *username, char *priv_key,
-char *password, char *src, char *dst, char **output);
+char *password, char *src, char *dest, char **output);
 
 /**
  * @brief scp - send to remote host
@@ -64,7 +64,7 @@ char *password, char *src, char *dst, char **output);
  * @param password remote cluster SSH password
  * @param src full path (or empty if in current directory) of the local FILE 
  * (no folders allowed) 
- * @param dst Full path and filename  (or empty if HOME directory) of FILE to transfer to.
+ * @param dest Full path and filename  (or empty if HOME directory) of FILE to transfer to.
  * This is the filename 
  * @param output return string - filled with the command output or error
  * @return exit code of the remote command
@@ -72,7 +72,7 @@ char *password, char *src, char *dst, char **output);
  * 0: successful transfer
  */
 int scp_send(char *hostname, char *port, char *username, char *priv_key,
-char *password, char *src, char *dst, char **output);
+char *password, char *src, char *dest, char **output);
 
 #ifdef __cplusplus
 }  // extern "C"

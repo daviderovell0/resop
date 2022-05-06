@@ -1,7 +1,7 @@
 /**
  * Series of test cases for the scp_send functions
  * SSH input credentials must be valid
- * src and dst must be valid paths
+ * src and dest must be valid paths
  */
 #include <iostream>
 #include <assert.h>
