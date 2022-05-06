@@ -38,4 +38,12 @@ valgrind ./test.o connect
 ....
 ```
 #### Node tests 
-TODO
+on this folder:
+```js
+npm install
+```
+then run the test file:
+```
+cd tests
+node test.js
+```
