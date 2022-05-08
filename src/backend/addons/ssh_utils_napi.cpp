@@ -61,7 +61,8 @@ static Napi::Value CheckSSHCredentials(const Napi::CallbackInfo& info) {
  * If priv_key is specified, password is considered to be the private
  * key passphrase
  * 
- * @return Napi::String (JS string)
+ * @return Napi::Object (JS object) with the follwing elements
+ * { rc: <return code>, out: <command output>}
  */
 Napi::Value Exec(const Napi::CallbackInfo& info) {
     
@@ -114,7 +115,25 @@ Napi::Value Exec(const Napi::CallbackInfo& info) {
     return outputs_wrapped;
 }
 
-
+/**
+ * @brief expose scp_recv() C function from ssh_utils_lib to NodeJS 
+ * Form when exported:
+ * exec({
+ *     hostname: 'val',
+ *     port: 'val',
+ *     username: 'val',
+ *     priv_key: 'val',
+ *     password: 'val',
+ *     commandline: 'val',
+ * });
+ * 
+ * All keys and either priv_key or password must be specified.
+ * If priv_key is specified, password is considered to be the private
+ * key passphrase
+ * 
+ * @return Napi::Object (JS object) with the follwing elements
+ * { rc: <return value>, out: <command output>}
+ */
 Napi::Value ScpRecv(const Napi::CallbackInfo& info) {
 
     CheckSSHCredentials(info);
@@ -167,6 +186,25 @@ Napi::Value ScpRecv(const Napi::CallbackInfo& info) {
     return outputs_wrapped;
 }
 
+/**
+ * @brief expose scp_send() C function from ssh_utils_lib to NodeJS 
+ * Form when exported:
+ * exec({
+ *     hostname: 'val',
+ *     port: 'val',
+ *     username: 'val',
+ *     priv_key: 'val',
+ *     password: 'val',
+ *     commandline: 'val',
+ * });
+ * 
+ * All keys and either priv_key or password must be specified.
+ * If priv_key is specified, password is considered to be the private
+ * key passphrase
+ * 
+ * @return Napi::Object (JS object) with the follwing elements
+ * { rc: <return value>, out: <command output>}
+ */
 Napi::Value ScpSend(const Napi::CallbackInfo& info) {
 
     CheckSSHCredentials(info);
@@ -219,6 +257,7 @@ Napi::Value ScpSend(const Napi::CallbackInfo& info) {
     return outputs_wrapped;
 }
 
+// export functions to module
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "exec"), Napi::Function::New(env, Exec));
   exports.Set(Napi::String::New(env, "scpRecv"), Napi::Function::New(env, ScpRecv));
