@@ -329,8 +329,7 @@ char *password, char *commandline, char **output) {
         //printf("inloop\n");
 
         while(nbytes > 0 || nbytes_stderr > 0) { // receiving!
-            // printf("%d\n", nbytes_stderr);
-            // printf("%p\n", output);
+            
             // check if we overflow init buffer size and reallocate
             if ((int)strlen(*output) + nbytes > output_size || (int)strlen(*output) + nbytes_stderr > output_size) {
                 printf("Reallocating output string size\n");
@@ -350,8 +349,20 @@ char *password, char *commandline, char **output) {
                 continue;
             }
 
-            strncat(*output, buffer, nbytes);
-            strncat(*output, buffer_stderr,nbytes_stderr);
+            //printf("bytes: %d\n", nbytes);
+            //printf("buflen: %ld\n", strlen(buffer));
+
+            // this series of ifs is to avoid errors
+            // due to executing strncat twice and adding unwanted chars
+            // at the end of *output in some cases
+            if (nbytes > 0) {
+                strncat(*output, buffer, nbytes);
+            }
+            else if (nbytes_stderr > 0) {
+                strncat(*output, buffer_stderr,nbytes_stderr);
+            }
+            
+            //printf("outputlen: %ld\n", strlen(*output));
 
             nbytes = libssh2_channel_read(channel, buffer, sizeof(buffer));
             nbytes_stderr = libssh2_channel_read_stderr(channel, buffer_stderr, sizeof(buffer_stderr));
