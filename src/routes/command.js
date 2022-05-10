@@ -87,7 +87,7 @@ router.post('/:op/cmd/:command', (req, res) => {
         error: 'Unkown command.',
       });
     }
-    return command.run(req, res);
+    return command.runSync(req, res);
   } catch (e) {
     console.error(
       `Error in running the command  ${commandName}. Error: ${e.message}`

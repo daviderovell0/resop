@@ -1,7 +1,9 @@
 import SSH2Agent from './SSH2Agent';
+import SSHUtils from './SSHUtils';
 
 // eslint-disable-next-line camelcase
 const remote_shell = new SSH2Agent();
+const sshell = new SSHUtils();
 
 /**
  * Command wrapper
@@ -131,6 +133,20 @@ export default class Command {
   }
 
   /**
+   * Runs a raw command string in the remote cluster.
+   * cmd should be the result of .generate*()
+   *
+   * @param {String} cmd
+   * @param {Object} user authenticated user object
+   * @returns {JSON} result of the command execution. result.success=bool
+   * indicates the commands output status
+   */
+  static async runRaw(cmd, user) {
+    const result = await remote_shell.exec(cmd, user);
+    return result;
+  }
+
+  /**
    * Runs a command in the remote cluster. Command options are taken from the
    * req body
    *
@@ -156,17 +172,21 @@ export default class Command {
     }
   }
 
-  /**
-   * Runs a raw command string in the remote cluster.
-   * cmd should be the result of .generate*()
-   *
-   * @param {String} cmd
-   * @param {Object} user authenticated user object
-   * @returns {JSON} result of the command execution. result.success=bool
-   * indicates the commands output status
-   */
-  static async runRaw(cmd, user) {
-    const result = await remote_shell.exec(cmd, user);
-    return result;
+  runSync(req, res) {
+    try {
+      const cmd = this.generate(req.body);
+      console.log(
+        `# ${this.user?.username} running command ${this.toString()}`
+      );
+      const out = sshell.exec(cmd, req.user);
+      return res.json(out);
+    } catch (error) {
+      console.log(error, req.body);
+      return res.status(422).json({
+        success: false,
+        input: req.body.input,
+        output: error,
+      });
+    }
   }
 }
