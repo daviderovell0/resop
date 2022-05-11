@@ -8,10 +8,10 @@ opn.defineOptions({
   path: 'fullpath to the file or relative path with respect to $HOME',
 });
 
-async function exec() {
+function exec() {
   opn.noEmptyOptions();
   opn.noNullOptions();
-  return opn.runCommand(opn.options.path);
+  opn.runCommand(opn.options.path);
 }
 
 // (must do), set the execution function

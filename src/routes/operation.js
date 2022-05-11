@@ -95,6 +95,12 @@ router.post('/:op/opn/:operation', (req, res) => {
       // IMPORTANT: set the operation user (username = cluster POSIX username)
       operation.setUser(req.user); // @TODO: add user check for second security layer
       // run the operation and return the response
+
+      // const result = operation.run();
+      // res.json(result);
+
+      // pipeline mostly sync but need async for some methods
+      // such as runOperationAsync
       operation.run().then((output) => {
         res.json(output);
       });

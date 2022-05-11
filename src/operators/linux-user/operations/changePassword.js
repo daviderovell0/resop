@@ -19,7 +19,7 @@ async function exec() {
 
   opn.addLog('Hash generation: MD5...');
 
-  const passwordHash = await opn.runOperation('linux-user', 'hashMD5', {
+  const passwordHash = await opn.runOperationAsync('linux-user', 'hashMD5', {
     password: opn.options.password,
     escapeChar: 'true',
   });

@@ -8,21 +8,28 @@ import sshUtils from './addons/binding';
  * Exploits the ssh2 NPM module
  */
 class SSHUtils {
-  helloWorld(username, password) {
+  attempt(username, password) {
     // Promise CRUCIAL to wait for the async event listening
-    return sshUtils.exec({
+    const retobj = sshUtils.exec({
       hostname: process.env.CLUSTER_ADDRESS,
       port: process.env.CLUSTER_SSH_PORT,
       username,
       password,
-      commandline: 'echo hello world!',
+      commandline: 'echo connection successful',
     });
+
+    return retobj.rc === 0;
   }
 
   /**
    * Executes the provided command through ssh on the remote server.
    *
    * @param {string} command
+   * @param {Object} user authenticated user object
+   * @returns {JSON} result of the command execution. result.success=bool
+   * indicates the commands output status. Format:
+   *
+   * {success: bool, command: string, output: string}
    */
   exec(command, user) {
     const output = {
@@ -49,7 +56,7 @@ class SSHUtils {
       commandline: command,
     });
 
-    console.log(`stdout:\n\t${out.out}`);
+    // console.log(`stdout:\n\t${out.out}`);
     output.success = out.rc === 0;
     output.output = out.out;
 
@@ -69,8 +76,8 @@ class SSHUtils {
     // get public key contents
     const publicKeyContent = readFileSync(publicKey);
 
-    this.exec({
-      host: process.env.CLUSTER_ADDRESS,
+    sshUtils.exec({
+      hostname: process.env.CLUSTER_ADDRESS,
       username,
       password,
       port: process.env.CLUSTER_SSH_PORT,
@@ -79,20 +86,22 @@ class SSHUtils {
     // do not check for errors. if dir already there it's not an
     // issue
 
-    const retobj = this.exec({
-      host: process.env.CLUSTER_ADDRESS,
+    const retobj = sshUtils.exec({
+      hostname: process.env.CLUSTER_ADDRESS,
       username,
       password,
       port: process.env.CLUSTER_SSH_PORT,
       commandline: `echo "${publicKeyContent}" >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys`,
     });
 
-    if (!retobj.success) {
-      console.log(`Failed to copy key. ${retobj.output}`);
+    const success = retobj.rc === 0;
+
+    if (!success) {
+      console.log(`Failed to copy key. ${retobj.out}`);
     } else {
       console.log(`key ${publicKey} successfully copied.`);
     }
-    return retobj.success;
+    return success;
   }
 }
 

@@ -133,28 +133,15 @@ export default class Command {
   }
 
   /**
-   * Runs a raw command string in the remote cluster.
-   * cmd should be the result of .generate*()
-   *
-   * @param {String} cmd
-   * @param {Object} user authenticated user object
-   * @returns {JSON} result of the command execution. result.success=bool
-   * indicates the commands output status
-   */
-  static async runRaw(cmd, user) {
-    const result = await remote_shell.exec(cmd, user);
-    return result;
-  }
-
-  /**
-   * Runs a command in the remote cluster. Command options are taken from the
+   * @deprecated
+   * Runs a command asynchronously in the remote cluster. Command options are taken from the
    * req body
    *
    * @param {Object} req Express object: HTTP request
    * @param {Object} res Express object: HTTP response
    * @returns HTTP response
    */
-  async run(req, res) {
+  async runAsync(req, res) {
     try {
       const cmd = this.generate(req.body);
       console.log(
@@ -172,12 +159,18 @@ export default class Command {
     }
   }
 
+  /**
+   * Runs a command synchronously in the remote cluster. Command options are taken from the
+   * req body
+   *
+   * @param {Object} req Express object: HTTP request
+   * @param {Object} res Express object: HTTP response
+   * @returns HTTP response
+   */
   runSync(req, res) {
     try {
       const cmd = this.generate(req.body);
-      console.log(
-        `# ${this.user?.username} running command ${this.toString()}`
-      );
+      console.log(`# ${req.user?.username} running command ${this.toString()}`);
       const out = sshell.exec(cmd, req.user);
       return res.json(out);
     } catch (error) {

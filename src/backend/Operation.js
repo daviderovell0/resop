@@ -1,7 +1,10 @@
-import Command from './Command';
 import CommandParser from './CommandParser';
 import OperationError from './OperationError';
 import OperationUtils from './OperationUtils';
+import SSHUtils from './SSHUtils';
+
+const sshell = new SSHUtils();
+
 /**
  * Operation wrapper
  */
@@ -186,8 +189,8 @@ export default class Operation {
    * @param {String} cmd
    * @returns {String} output of the remote command
    */
-  async runCommand(cmd) {
-    const result = await Command.runRaw(cmd, this.user);
+  runCommand(cmd) {
+    const result = sshell.exec(cmd, this.user);
     if (!result.success) {
       this.error(`CommandError: ${result.output}`);
     }
@@ -205,7 +208,7 @@ export default class Operation {
    * @param {JSON} commandObject
    * @returns null
    */
-  async runCommandDefined(commandObject) {
+  runCommandDefined(commandObject) {
     const commandName = commandObject.command;
 
     const command = new CommandParser(this.operator).getCommand(commandName);
@@ -217,7 +220,7 @@ export default class Operation {
     delete commandObject.command;
     const cmd = command.generate(commandObject, this.user);
 
-    const result = await Command.runRaw(cmd, this.user);
+    const result = sshell.exec(cmd, this.user);
     if (!result.success) {
       this.error(`CommandError: ${result.output}`);
     }
@@ -234,12 +237,30 @@ export default class Operation {
    * @throws {OperationError} for errors during the execution
    * @throws {Error} for errors in the operation definition
    */
-  async runOperation(operator, operation, options) {
+  async runOperationAsync(operator, operation, options) {
     // find the operation
     const opn = await new OperationUtils(operator).findOperation(operation);
     if (!opn) {
       throw `${operation} in operator ${operator} not found`;
     }
+    opn.setOptions(options);
+    opn.setUser(this.user);
+    return opn.execFunction();
+  }
+
+  /**
+   * Runs *any* Operation already defined in the API.
+   *
+   * @param {String} operationInstance imported Operation object
+   * (result of import ....<operator>/operations/<operation>.js)
+   * @param {JSON} options {option1: value1...} set of options
+   * @returns {*} operation's result
+   * @throws {OperationError} for errors during the execution
+   * @throws {Error} for errors in the operation definition
+   */
+  runOperation(operationInstance, options) {
+    // find the operation
+    const opn = Object.values(operationInstance)[0];
     opn.setOptions(options);
     opn.setUser(this.user);
     return opn.execFunction();
