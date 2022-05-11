@@ -17,7 +17,7 @@ console.log(`${JSON.stringify(configExec)}`);
 console.log('\nTesting exec method...')
 // execute the command via SSH and save the return object
 let ro = sshUtils.exec(configExec);
-console.log(`> return code ${ro['rc']}\n> output:\n${ro['out']}`);
+console.log(`> return code ${ro.rc}\n> output:\n${ro.out}`);
 
 console.log('\nTesting scpRecv method...');
 configExec["src"] = configExec["remote_source"];

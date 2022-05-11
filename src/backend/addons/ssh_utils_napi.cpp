@@ -5,19 +5,14 @@
 
 using namespace std;
 
-static Napi::Value CheckSSHCredentials(const Napi::CallbackInfo& info) {
-    Napi::Env env = info.Env();
+static string CheckSSHCredentials(const Napi::CallbackInfo& info) {
     
     if (info.Length() != 1) {
-        Napi::TypeError::New(env, "This function takes 1 JS object as arg")
-        .ThrowAsJavaScriptException();
-        return env.Null();
+        return "This function takes 1 JS object as arg";
     }
 
     if(!info[0].IsObject()) {
-        Napi::TypeError::New(env, "argument must be an object.")
-        .ThrowAsJavaScriptException();
-        return env.Null();
+        return "argument must be an object.";
     }
 
     Napi::Object args = info[0].ToObject();
@@ -31,18 +26,14 @@ static Napi::Value CheckSSHCredentials(const Napi::CallbackInfo& info) {
     args.Get("port").IsUndefined() || 
     args.Get("username").IsUndefined()) {
         
-        Napi::Error::New(env, args_error)
-        .ThrowAsJavaScriptException();
-        return env.Null();
+        return args_error;
     }
 
     if(args.Get("priv_key").IsUndefined() && args.Get("password").IsUndefined()) {
-        Napi::Error::New(env, args_error)
-        .ThrowAsJavaScriptException();
-        return env.Null();
+        return args_error;
     } 
 
-    return Napi::Number::New(env,0);
+    return "";
 }
 
 /**
@@ -65,14 +56,17 @@ static Napi::Value CheckSSHCredentials(const Napi::CallbackInfo& info) {
  * { rc: <return code>, out: <command output>}
  */
 Napi::Value Exec(const Napi::CallbackInfo& info) {
-    
-    CheckSSHCredentials(info);
-
     Napi::Env env = info.Env();
     Napi::Object args = info[0].ToObject();
+ 
+    string error  = CheckSSHCredentials(info);
+    if (!error.empty()) {
+        Napi::Error::New(env, error)
+        .ThrowAsJavaScriptException();
+        return env.Null();
+    }
 
-   
-    string error = "commandline field required for exec()";
+    error = "commandline field required for exec()";
 
     if(args.Get("commandline").IsUndefined()) {
         
@@ -93,10 +87,8 @@ Napi::Value Exec(const Napi::CallbackInfo& info) {
     } 
     if(!args.Get("priv_key").IsUndefined()) { // if priv_key defined
         priv_key = args.Get("priv_key").As<Napi::String>().Utf8Value();
-        
     } 
     // if both defined, password is used as priv_key passphrase
-
     char *output;
     int rc = exec(&hostname[0], 
                   &port[0], 
@@ -136,12 +128,17 @@ Napi::Value Exec(const Napi::CallbackInfo& info) {
  */
 Napi::Value ScpRecv(const Napi::CallbackInfo& info) {
 
-    CheckSSHCredentials(info);
-
     Napi::Env env = info.Env();
     Napi::Object args = info[0].ToObject();
+ 
+    string error  = CheckSSHCredentials(info);
+    if (!error.empty()) {
+        Napi::Error::New(env, error)
+        .ThrowAsJavaScriptException();
+        return env.Null();
+    }
 
-    string error = "src and dest field required for scpRecv";
+    error = "src and dest field required for scpRecv";
 
     if(args.Get("src").IsUndefined() || args.Get("dest").IsUndefined()) {
         
@@ -207,12 +204,17 @@ Napi::Value ScpRecv(const Napi::CallbackInfo& info) {
  */
 Napi::Value ScpSend(const Napi::CallbackInfo& info) {
 
-    CheckSSHCredentials(info);
-
     Napi::Env env = info.Env();
     Napi::Object args = info[0].ToObject();
+ 
+    string error  = CheckSSHCredentials(info);
+    if (!error.empty()) {
+        Napi::Error::New(env, error)
+        .ThrowAsJavaScriptException();
+        return env.Null();
+    }
 
-    string error = "src and dest field required for scpSend";
+    error = "src and dest field required for scpSend";
 
     if(args.Get("src").IsUndefined() || args.Get("dest").IsUndefined()) {
         
