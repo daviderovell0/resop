@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import shell from 'shelljs';
 import jsSHA from 'jssha';
-import SSH2Agent from '../../../backend/SSH2Agent';
 import SSHUtils from '../../../backend/SSHUtils';
 import Operation from '../../../backend/Operation';
 
@@ -28,7 +27,6 @@ function exec() {
   opn.noEmptyOptions();
   opn.noNullOptions();
 
-  // const ssh = new SSH2Agent();
   const sshell = new SSHUtils();
   opn.addLog(`user ${opn.options.username} attempting to login...`);
   let success = sshell.attempt(opn.options.username, opn.options.password);

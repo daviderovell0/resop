@@ -2,10 +2,9 @@ import { readFileSync } from 'fs';
 import sshUtils from './addons/binding';
 
 /**
- * SSH2Agent - provides helper methods to execute commands on a remote server.
+ * SSHUtils - provides helper methods to execute commands on a remote server.
  * The remote rserver should a head node or a master node in case of HPC cluster
  *
- * Exploits the ssh2 NPM module
  */
 class SSHUtils {
   attempt(username, password) {
@@ -102,6 +101,68 @@ class SSHUtils {
       console.log(`key ${publicKey} successfully copied.`);
     }
     return success;
+  }
+
+  scpRecv(src, dest, user) {
+    const output = {
+      success: false,
+      operation: 'receive',
+      output: '',
+    };
+
+    if (process.env.IN_PROD !== 'true') {
+      return {
+        success: true,
+        operation: 'receive',
+        output: 'dev',
+      };
+    }
+    const retobj = sshUtils.scpRecv({
+      hostname: process.env.CLUSTER_ADDRESS,
+      port: process.env.CLUSTER_SSH_PORT,
+      username: user.username,
+      priv_key: user.keyPath,
+      password: user.keyPassphrase,
+      src,
+      dest,
+    });
+
+    output.success = retobj.rc === 0;
+    output.output = retobj.out;
+
+    return output;
+  }
+
+  scpSend(src, dest, user) {
+    const output = {
+      success: false,
+      operation: 'receive',
+      output: '',
+    };
+
+    if (process.env.IN_PROD !== 'true') {
+      return {
+        success: true,
+        operation: 'receive',
+        output: 'dev',
+      };
+    }
+
+    console.log(user);
+    const retobj = sshUtils.scpSend({
+      hostname: process.env.CLUSTER_ADDRESS,
+      port: process.env.CLUSTER_SSH_PORT,
+      username: user.username,
+      priv_key: user.keyPath,
+      password: user.keyPassphrase,
+      src,
+      dest,
+    });
+
+    output.success = retobj.rc === 0;
+    output.output = retobj.out;
+
+    return output;
   }
 }
 

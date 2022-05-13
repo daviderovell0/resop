@@ -116,7 +116,8 @@ Napi::Value Exec(const Napi::CallbackInfo& info) {
  *     username: 'val',
  *     priv_key: 'val',
  *     password: 'val',
- *     commandline: 'val',
+ *     src: 'val',
+ *     dest: 'val'
  * });
  * 
  * All keys and either priv_key or password must be specified.
@@ -150,7 +151,6 @@ Napi::Value ScpRecv(const Napi::CallbackInfo& info) {
     string hostname = args.Get("hostname").As<Napi::String>().Utf8Value();
     string port = args.Get("port").As<Napi::String>().Utf8Value();
     string username = args.Get("username").As<Napi::String>().Utf8Value();
-    string commandline = args.Get("commandline").As<Napi::String>().Utf8Value();
     string src = args.Get("src").As<Napi::String>().Utf8Value();
     string dest = args.Get("dest").As<Napi::String>().Utf8Value();
     string priv_key = "";
@@ -192,7 +192,8 @@ Napi::Value ScpRecv(const Napi::CallbackInfo& info) {
  *     username: 'val',
  *     priv_key: 'val',
  *     password: 'val',
- *     commandline: 'val',
+ *     src: 'val',
+ *     dest: 'val'
  * });
  * 
  * All keys and either priv_key or password must be specified.
@@ -226,7 +227,6 @@ Napi::Value ScpSend(const Napi::CallbackInfo& info) {
     string hostname = args.Get("hostname").As<Napi::String>().Utf8Value();
     string port = args.Get("port").As<Napi::String>().Utf8Value();
     string username = args.Get("username").As<Napi::String>().Utf8Value();
-    string commandline = args.Get("commandline").As<Napi::String>().Utf8Value();
     string src = args.Get("src").As<Napi::String>().Utf8Value();
     string dest = args.Get("dest").As<Napi::String>().Utf8Value();
     string priv_key = "";
@@ -240,7 +240,7 @@ Napi::Value ScpSend(const Napi::CallbackInfo& info) {
         priv_key = args.Get("priv_key").As<Napi::String>().Utf8Value();
         
     } 
-    // if both defined, password is used as priv_key passphrase
+    //if both defined, password is used as priv_key passphrase
 
     char *output;
     int rc = scp_send(&hostname[0], 
