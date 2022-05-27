@@ -106,14 +106,12 @@ class SSHUtils {
   scpRecv(src, dest, user) {
     const output = {
       success: false,
-      operation: 'receive',
       output: '',
     };
 
     if (process.env.IN_PROD !== 'true') {
       return {
         success: true,
-        operation: 'receive',
         output: 'dev',
       };
     }
@@ -148,7 +146,6 @@ class SSHUtils {
       };
     }
 
-    console.log(user);
     const retobj = sshUtils.scpSend({
       hostname: process.env.CLUSTER_ADDRESS,
       port: process.env.CLUSTER_SSH_PORT,
