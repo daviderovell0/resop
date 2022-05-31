@@ -11,7 +11,7 @@ opn.defineOptions({
 function exec() {
   opn.noEmptyOptions();
   opn.noNullOptions();
-  opn.runCommand(opn.options.path);
+  return opn.runCommand(opn.options.path);
 }
 
 // (must do), set the execution function
