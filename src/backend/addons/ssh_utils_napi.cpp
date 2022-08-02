@@ -110,7 +110,7 @@ Napi::Value Exec(const Napi::CallbackInfo& info) {
 /**
  * @brief expose scp_recv() C function from ssh_utils_lib to NodeJS 
  * Form when exported:
- * exec({
+ * exscpRecv({
  *     hostname: 'val',
  *     port: 'val',
  *     username: 'val',
@@ -186,7 +186,7 @@ Napi::Value ScpRecv(const Napi::CallbackInfo& info) {
 /**
  * @brief expose scp_send() C function from ssh_utils_lib to NodeJS 
  * Form when exported:
- * exec({
+ * scpSend({
  *     hostname: 'val',
  *     port: 'val',
  *     username: 'val',

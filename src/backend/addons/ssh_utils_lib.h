@@ -43,8 +43,8 @@ char *password, char *commandline, char **output);
  * @param priv_key local private key associated to the remote cluster.
  * public key is <priv_key>.pub
  * @param password remote cluster SSH password
- * @param src full path (or name in in HOME) of remote file to transfer
- * @param dest full path (or empty if current directory) of the local folder/file 
+ * @param src full path (or relative path to $HOME) of remote file to transfer
+ * @param dest full path (or empty if current directory) of the local file 
  * @param output return string - filled with the command output or error
  * @return exit code of the remote command
  * < 0: internal error, error in the scp transfer

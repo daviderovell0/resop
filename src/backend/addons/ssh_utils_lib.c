@@ -425,33 +425,7 @@ char *password, char *src, char *dest, char **output) {
     LIBSSH2_CHANNEL *channel;
     libssh2_struct_stat fileinfo;
     char *dest_formatted = dest;
-    int dest_owner = 0;
     int rc;
-
-    // if it's a dir we will keep the name of the source file
-    if(!stat(dest, &fileinfo)  && S_ISDIR(fileinfo.st_mode)) {
-        char *remote_filename;
-        int index_of_last_slash = 0;
-        // find last "/" in the source remote path
-        // if not present take it all
-        for (int i = strlen(src)-1; i >= 0; i--) {
-            if (src[i] == '/') {
-                index_of_last_slash = i;
-            }
-        }
-              
-        remote_filename = src + index_of_last_slash;
-        printf("extracted filename: %s\n", remote_filename);
-        dest_owner = 1;
-        int dest_formatted_length = strlen(dest) + strlen(src);
-        dest_formatted = (char *)malloc(dest_formatted_length*sizeof(char)+1);
-        dest_formatted[0] = '\0'; // make sure pointer is null
-
-        strncat(dest_formatted, dest, dest_formatted_length);
-        strncat(dest_formatted, remote_filename, dest_formatted_length);
-        dest_formatted[strlen(dest) + strlen(remote_filename)] = '\0';
-        printf("new dest: %s\n", dest_formatted);
-    }
 
     // establish the SSH2 connection
     if((rc = sshconnect(hostname, port, username, priv_key, password, 
@@ -522,7 +496,6 @@ char *password, char *src, char *dest, char **output) {
     }
     // successfully run scp, cleanup & return
     fclose(localfile);
-    if(dest_owner) free(dest_formatted);
     
     // close channel
     while((rc = libssh2_channel_close(channel)) == LIBSSH2_ERROR_EAGAIN)
