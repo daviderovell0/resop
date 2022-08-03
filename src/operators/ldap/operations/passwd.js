@@ -18,7 +18,7 @@ opn.defineOptions({
 });
 
 // LDAP pwd gen. algorithm: base64encode( SHA1(password + salt) + salt)
-async function exec() {
+function exec() {
   if (!opn.options.password || opn.options.password === '') {
     opn.error('field password cannot be null or empty');
   }

@@ -1,0 +1,10 @@
+HOSTNAME=remoteserver.com
+PORT=22
+USERNAME=johndoe
+PRIV_KEY=/home/johndoe/.ssh/id_rsa
+PASSWORD=mypassphrase
+COMMANDLINE=echo hello
+REMOTE_SOURCE=snake.py
+REMOTE_DESTINATION=/full/path/
+LOCAL_SOURCE=scp_send.cpp
+LOCAL_DESTINATION=./

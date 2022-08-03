@@ -12,16 +12,16 @@ opn.defineOptions({
 });
 
 // can define a custom function
-async function exec() {
+function exec() {
   opn.addLog('Hash generation: MD5...');
-  let passwordHash = await opn.runCommand(
+  let passwordHash = opn.runCommand(
     `openssl passwd -1 ${opn.options.password}`
   );
 
   passwordHash = passwordHash.replaceAll('$', '\\$');
 
   opn.addLog('creating user...');
-  await opn.runCommand(
+  opn.runCommand(
     `useradd --password "${passwordHash}" ${opn.options.username}`
   );
   opn.addLog('done');

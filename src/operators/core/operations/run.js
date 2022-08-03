@@ -2,16 +2,17 @@ import Operation from '../../../backend/Operation';
 
 const opn = new Operation();
 
-opn.setDescription('Execute a script or a bin file');
+opn.setDescription('Run a command or a script on the remote default shell');
 
 opn.defineOptions({
-  path: 'fullpath to the file or relative path with respect to $HOME',
+  input:
+    'command or path to the script (can use relative path with respect to $HOME)',
 });
 
-async function exec() {
+function exec() {
   opn.noEmptyOptions();
   opn.noNullOptions();
-  return opn.runCommand(opn.options.path);
+  return opn.runCommand(opn.options.input);
 }
 
 // (must do), set the execution function

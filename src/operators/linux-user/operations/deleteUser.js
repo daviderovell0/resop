@@ -11,13 +11,13 @@ opn.defineOptions({
 });
 
 // can define a custom function
-async function exec() {
+function exec() {
   if (!opn.options.username) {
     opn.error('username field is empty');
   }
 
   opn.addLog('Deleting user...');
-  const stdout = await opn.runCommand(`userdel -f -r ${opn.options.username}`);
+  const stdout = opn.runCommand(`userdel -f -r ${opn.options.username}`);
   opn.addLog('done');
   return `user deleted. stdout: ${stdout}`;
 }

@@ -1,8 +1,12 @@
 package-lock.json
 node_modules
 .env
+variables.txt
 dist/
-
+# build files
+*build/
+*.o
+*.out 
 # vagrantcluster generated files
 .vagrant
 *_key

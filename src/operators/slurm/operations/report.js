@@ -51,7 +51,7 @@ function formatDate(date) {
   return -1;
 }
 
-async function exec() {
+function exec() {
   // format, init, check inputs
 
   // type
@@ -90,7 +90,7 @@ async function exec() {
   // CLUSTER report
   if (opn.options.type === 'cluster') {
     opn.addLog('Generating cluster usage report');
-    const out = await opn.runCommand(
+    const out = opn.runCommand(
       `sreport -Pn -t ${unit} cluster utilisation ` +
         `start=${start} end=${end}`
     );
@@ -123,7 +123,7 @@ async function exec() {
   // > filters
   let entityList = []; // list users or accounts
   if (opn.options.nameStartsWith || opn.options.nameEndsWith) {
-    const allEntities = await opn.runCommand(
+    const allEntities = opn.runCommand(
       `sacctmgr show ${type} format=${type} -Pn`
     );
     entityList = allEntities.split('\n');
@@ -157,7 +157,7 @@ async function exec() {
   // > generate report
   // total
   if (opn.options.total === 'true') {
-    const out = await opn.runCommand(
+    const out = opn.runCommand(
       `sreport -Pn -t ${unit} cluster ${utilisationby} ` +
         `${type}=${names} start=${start} end=${end} format=used`
     );
@@ -192,7 +192,7 @@ async function exec() {
 
         // almost copy of "normal execution"
         // TODO? do this in a smarter way, maybe put it in a function
-        const out = await opn.runCommand(
+        const out = opn.runCommand(
           `sreport -Pn -t ${unit} cluster ${utilisationby} ` +
             `${type}=${names} start=${y}-${mString}-01 end=${y}-${mString}-31 format=${sreportFormat}`
         );
@@ -223,7 +223,7 @@ async function exec() {
   }
 
   // normal execution
-  const out = await opn.runCommand(
+  const out = opn.runCommand(
     `sreport -Pn -t ${unit} cluster ${utilisationby} ` +
       `${type}=${names} start=${start} end=${end} format=${sreportFormat}`
   );

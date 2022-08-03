@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import shell from 'shelljs';
 import jsSHA from 'jssha';
-import SSH2Agent from '../../../backend/SSH2Agent';
+import SSHUtils from '../../../backend/SSHUtils';
 import Operation from '../../../backend/Operation';
 
 /**
@@ -23,13 +23,13 @@ opn.defineOptions({
   password: 'cluster password',
 });
 
-async function exec() {
+function exec() {
   opn.noEmptyOptions();
   opn.noNullOptions();
 
-  const ssh = new SSH2Agent();
+  const sshell = new SSHUtils();
   opn.addLog(`user ${opn.options.username} attempting to login...`);
-  let success = await ssh.attempt(opn.options.username, opn.options.password);
+  let success = sshell.attempt(opn.options.username, opn.options.password);
   if (!success) {
     opn.error('Invalid credentials');
   }
@@ -65,8 +65,10 @@ async function exec() {
     throw 'Error generating the SSH key during login proceure';
   }
 
+  console.log(`generated key: ${keyPath}`);
+
   // copy the public key to the remote cluster
-  success = await ssh.copyID(
+  success = sshell.copyID(
     opn.options.username,
     opn.options.password,
     `${keyPath}.pub`

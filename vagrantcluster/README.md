@@ -12,6 +12,7 @@ Getting Started
 ---------------
 
 1. Install Vagrant: https://www.vagrantup.com/
+1. Install VirtualBox: https://www.virtualbox.org/
 1. Clone this repository
 1. Run the `gensshkeys.sh` script to generate ssh keys in the ansible repository
 1. (Optional) Copy `localenv.sh.in` to `localenv.sh` and populate it with any local environment variables you need during the vagrant provisioning step (HTTP proxy information, for example)
