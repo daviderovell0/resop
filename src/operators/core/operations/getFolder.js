@@ -18,9 +18,14 @@ function exec() {
   const sshell = new SSHUtils();
 
   // check if source is a folder
+
   let retobj = sshell.exec(`test -d ${opn.options.source}`, opn.user);
-  if (!retobj.success) {
+  console.log(retobj);
+  if (!retobj.success && retobj.output === '') {
     opn.error(`${opn.options.source} not a folder`);
+  }
+  if (!retobj.success) {
+    opn.error(retobj.output);
   }
 
   // get folders recursively from the selected source
