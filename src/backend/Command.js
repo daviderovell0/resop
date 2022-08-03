@@ -114,8 +114,6 @@ export default class Command {
       command += ` ${this.subcommand}`;
     }
     const input = payload?.input || '';
-    // "sanitize" input
-    Command.checkInputFormat(input);
 
     // Add all the necessary flags for the supported options
     this.getOptions().forEach((option) => {
@@ -129,6 +127,8 @@ export default class Command {
 
     // concatenate the input command
     command += ` ${input}`;
+    // "sanitize" input
+    Command.checkInputFormat(command);
     return command;
   }
 

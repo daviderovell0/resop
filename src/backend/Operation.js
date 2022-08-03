@@ -2,6 +2,7 @@ import CommandParser from './CommandParser';
 import OperationError from './OperationError';
 import OperationUtils from './OperationUtils';
 import SSHUtils from './SSHUtils';
+import Command from './Command';
 
 const sshell = new SSHUtils();
 
@@ -120,6 +121,8 @@ export default class Operation {
     this.getAllowedOptions().forEach((option) => {
       // Only if the option is supported
       if (Object.keys(payload).includes(option)) {
+        // "sanitize" input
+        Command.checkInputFormat(payload[option]);
         this.options[option] = payload[option];
       } else {
         this.options[option] = null;
