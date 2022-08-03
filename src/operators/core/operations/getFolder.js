@@ -20,7 +20,7 @@ function exec() {
   // check if source is a folder
 
   let retobj = sshell.exec(`test -d ${opn.options.source}`, opn.user);
-  console.log(retobj);
+
   if (!retobj.success && retobj.output === '') {
     opn.error(`${opn.options.source} not a folder`);
   }
@@ -58,7 +58,6 @@ function exec() {
     );
 
     if (!retobj.success) {
-      // else throw generic error
       opn.error(retobj.output);
     }
     opn.addLog(`${file} copied`);
