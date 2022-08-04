@@ -23,6 +23,7 @@ export default class Operation {
     this.description = null;
     this.user = null;
     this.execFunction = null;
+    this.checkInput = true;
   }
 
   /**
@@ -96,6 +97,14 @@ export default class Operation {
   }
 
   /**
+   * Allow special shell characters in the body fiels
+   * (see Command.checkInputFormat())
+   */
+  noInputCheck() {
+    this.checkInput = false;
+  }
+
+  /**
    * Define the options (or fields) for an operation.
    * Options are read from a user's
    * */
@@ -122,7 +131,8 @@ export default class Operation {
       // Only if the option is supported
       if (Object.keys(payload).includes(option)) {
         // "sanitize" input
-        Command.checkInputFormat(payload[option]);
+        console.log(this.checkInput);
+        if (this.checkInput) Command.checkInputFormat(payload[option]);
         this.options[option] = payload[option];
       } else {
         this.options[option] = null;

@@ -9,9 +9,13 @@ opn.defineOptions({
     'command or path to the script (can use relative path with respect to $HOME)',
 });
 
+// allow special characters: pipe, & etc.
+opn.noInputCheck();
+
 function exec() {
   opn.noEmptyOptions();
   opn.noNullOptions();
+
   return opn.runCommand(opn.options.input);
 }
 
