@@ -6,6 +6,22 @@
     "editor.formatOnSave": false,
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
+    },
+    "files.associations": {
+      ".env.example": "coffeescript",
+      ".env": "shellscript",
+      "iostream": "cpp",
+      "array": "c",
+      "deque": "c",
+      "list": "c",
+      "string": "c",
+      "unordered_map": "c",
+      "unordered_set": "c",
+      "vector": "c",
+      "string_view": "c",
+      "initializer_list": "c",
+      "fstream": "cpp",
+      "ostream": "cpp"
     }
   }
 }

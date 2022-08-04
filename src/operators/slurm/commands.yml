@@ -518,3 +518,18 @@
 
   description: sinfo is used to view partition and node information for a system running Slurm.
   enabled: true # not currently used, but can be used to disable certain commands temporarily
+
+- command: sreport
+  description: Generate reports from the slurm accounting data
+  enabled: true
+  options:
+    parsable:
+      flag: --parsable2
+      description: Output delimited by | without | at the end
+    noheader:
+      flag: -n
+      description: Omit columns headers, clean output
+    time:
+      flag: -t
+      description: values: percent, hour, hourper, minute, minuteper, second, secondper. default=minutes
+

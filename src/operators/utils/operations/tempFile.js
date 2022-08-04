@@ -10,7 +10,7 @@ opn.defineOptions({
   content: 'String with the content of the file',
 });
 
-async function exec() {
+function exec() {
   const tempfile = tmp.tmpNameSync();
 
   opn.addLog(opn.options.content);
@@ -26,7 +26,7 @@ async function exec() {
   opn.addLog(parsedContent);
 
   // TODO: fix issue: some special characters "break" the string and are not supported: `'
-  await opn.runCommand(`printf "%s" "${parsedContent}" > ${tempfile}`);
+  opn.runCommand(`printf "%s" "${parsedContent}" > ${tempfile}`);
   return tempfile;
 }
 

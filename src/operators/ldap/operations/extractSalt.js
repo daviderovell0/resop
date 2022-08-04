@@ -17,7 +17,7 @@ opn.defineOptions({
 
 // LDAP pwd gen. algorithm: base64encode( SHA1(password + salt) + salt).
 // salt extraction: base64decode(pwd) -> remove 1st 20 bytes ->  base64encode() for visibility
-async function exec() {
+function exec() {
   if (!opn.options.password || opn.options.password === '') opn.error('field password cannot be null');
 
   const trimPasswd = opn.options.password.slice(6, opn.options.password.length);

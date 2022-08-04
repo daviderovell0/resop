@@ -14,7 +14,7 @@ opn.defineOptions({
 });
 
 // can define a custom function
-async function exec() {
+function exec() {
   if (!opn.options.password) {
     opn.error('password field is empty');
   }
@@ -30,7 +30,7 @@ async function exec() {
 
   // opn.error('test');
   opn.addLog('Hash generation: MD5...');
-  let passwordHash = await opn.runCommand(
+  let passwordHash = opn.runCommand(
     `openssl passwd -1 ${opn.options.password}`
   );
   if (opn.options.escapeChar) {

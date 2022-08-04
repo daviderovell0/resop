@@ -91,13 +91,24 @@ router.post('/:op/opn/:operation', (req, res) => {
         });
       }
       // extract operation options from the body
-      operation.setOptions(req.body);
-      // IMPORTANT: set the operation user (username = cluster POSIX username)
-      operation.setUser(req.user); // @TODO: add user check for second security layer
-      // run the operation and return the response
-      operation.run().then((output) => {
-        res.json(output);
-      });
+      try {
+        operation.setOptions(req.body);
+
+        // IMPORTANT: set the operation user (username = cluster POSIX username)
+        operation.setUser(req.user); // @TODO: add user check for second security layer
+        // run the operation and return the response
+
+        // const result = operation.run();
+        // res.json(result);
+
+        // pipeline mostly sync but need async for some methods
+        // such as runOperationAsync
+        operation.run().then((output) => {
+          res.json(output);
+        });
+      } catch (e) {
+        res.json({ success: false, output: e });
+      }
     },
     (e) => {
       console.error(
